@@ -1,0 +1,20 @@
+CS650 Chapter 3 Participation — Backend Regression Test
+
+PASS — index.html JavaScript syntax parses successfully.
+PASS — 89 lecture slide images are included.
+PASS — Supabase login/create-account controls are present.
+PASS — participation-api is invoked for bootstrap, resume_session, start_session, card_opened, answer_knowledge.
+PASS — lecture views use CS3-SL### tracking keys.
+PASS — study cards use CS3-F-* tracking keys.
+PASS — knowledge checks use CS3-MC-* tracking keys.
+PASS — PDF generation uses the server completion record and verification code.
+PASS — participation content is gated until roster verification succeeds.
+
+Backend verification
+- CS650 course exists.
+- CS650-F26 Fall 2026 section exists and is active.
+- Chapter 3 assignment is published.
+- 150 required backend card records = 89 lecture pages + 61 study cards.
+- 33 required knowledge questions.
+- 33 protected server answer keys.
+- No student sessions existed at build time.
