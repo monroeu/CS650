@@ -21,6 +21,90 @@ main{max-width:1180px;margin:0 auto;padding:22px 18px 70px} .hero{background:rgb
 .authbox{background:rgba(251,249,241,.97);border:2px solid var(--accent2);padding:18px;margin:0 0 18px;box-shadow:3px 3px 0 #D9E8E3}.authgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.authbox input{width:100%;padding:10px;border:1px solid var(--line);font-size:16px}.authactions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.identity{margin-top:12px;padding:12px;background:#eef9fb;border-left:4px solid var(--accent2)}.identity-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.identity span{font-size:12px;color:var(--muted);display:block}.gate-note{font-size:13px;color:var(--muted);margin-top:8px}.status-ok{color:var(--ok);font-weight:700}.status-err{color:#a22;font-weight:700}.server-badge{display:inline-block;padding:3px 7px;border:1px solid #8ab7ae;background:#f4fbf8;font-size:11px;font-weight:700;border-radius:999px}.receipt button:disabled{opacity:.45;cursor:not-allowed}
 @media(max-width:780px){.lesson{grid-template-columns:1fr} .cardsGrid{grid-template-columns:1fr} .hero h1{font-size:25px} .progressWrap{min-width:140px} nav.sections{top:72px} .top{align-items:flex-start}}
 @media print{header,nav.sections,.pager,.primary{display:none!important} body{background:#fff} main{max-width:none} .panel{break-inside:avoid}}
+
+
+.illustration-note{
+  display:inline-block;
+  margin-top:.5rem;
+  padding:.35rem .65rem;
+  border:1px solid rgba(7,88,171,.18);
+  background:#eef6ff;
+  color:#0f3b78;
+  border-radius:999px;
+  font-size:.88rem;
+  font-weight:700;
+}
+.illustration-panel{
+  background:#fbfdff;
+  border:1px solid var(--line);
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:0 12px 26px rgba(16,24,40,.06);
+}
+.illustration-head{
+  padding:18px 18px 8px;
+  border-bottom:1px solid #edf2f7;
+}
+.illustration-head h4{
+  margin:0 0 .4rem;
+  font-size:1.15rem;
+  line-height:1.35;
+}
+.illustration-head p{
+  margin:0;
+  color:var(--muted);
+}
+.illustration-body{
+  padding:16px 18px 18px;
+  display:grid;
+  gap:16px;
+}
+.illus-grid{
+  display:grid;
+  gap:16px;
+  grid-template-columns:1.1fr .9fr;
+}
+.trace-box,
+.steps-box,
+.teacher-box,
+.homework-box{
+  border:1px solid #e5e7eb;
+  border-radius:14px;
+  padding:14px;
+  background:#fff;
+}
+.trace-box h5,
+.steps-box h5,
+.teacher-box h5,
+.homework-box h5{
+  margin:0 0 .6rem;
+  font-size:1rem;
+}
+.trace-diagram{
+  white-space:pre-wrap;
+  font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size:.92rem;
+  line-height:1.55;
+  margin:0;
+  color:#1f2937;
+}
+.step-list{
+  margin:0;
+  padding-left:1.15rem;
+}
+.step-list li{
+  margin:0 0 .7rem;
+}
+.step-list li:last-child{margin-bottom:0;}
+.teacher-box ul,.homework-box ul{
+  margin:.35rem 0 0 1.1rem;
+}
+.teacher-box li,.homework-box li{margin:.45rem 0;}
+@media(max-width:860px){
+  .illus-grid{grid-template-columns:1fr;}
+  .illustration-head,.illustration-body{padding-inline:14px;}
+}
+
 </style>
 <style id="cs650-mobile-first">
 html{-webkit-text-size-adjust:100%}
@@ -126,6 +210,90 @@ nav.sections{display:none!important}
 .explain .notes .lead{font-weight:600}
 .explain .notes .note-block{margin-bottom:1rem}
 
+
+
+.illustration-note{
+  display:inline-block;
+  margin-top:.5rem;
+  padding:.35rem .65rem;
+  border:1px solid rgba(7,88,171,.18);
+  background:#eef6ff;
+  color:#0f3b78;
+  border-radius:999px;
+  font-size:.88rem;
+  font-weight:700;
+}
+.illustration-panel{
+  background:#fbfdff;
+  border:1px solid var(--line);
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:0 12px 26px rgba(16,24,40,.06);
+}
+.illustration-head{
+  padding:18px 18px 8px;
+  border-bottom:1px solid #edf2f7;
+}
+.illustration-head h4{
+  margin:0 0 .4rem;
+  font-size:1.15rem;
+  line-height:1.35;
+}
+.illustration-head p{
+  margin:0;
+  color:var(--muted);
+}
+.illustration-body{
+  padding:16px 18px 18px;
+  display:grid;
+  gap:16px;
+}
+.illus-grid{
+  display:grid;
+  gap:16px;
+  grid-template-columns:1.1fr .9fr;
+}
+.trace-box,
+.steps-box,
+.teacher-box,
+.homework-box{
+  border:1px solid #e5e7eb;
+  border-radius:14px;
+  padding:14px;
+  background:#fff;
+}
+.trace-box h5,
+.steps-box h5,
+.teacher-box h5,
+.homework-box h5{
+  margin:0 0 .6rem;
+  font-size:1rem;
+}
+.trace-diagram{
+  white-space:pre-wrap;
+  font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size:.92rem;
+  line-height:1.55;
+  margin:0;
+  color:#1f2937;
+}
+.step-list{
+  margin:0;
+  padding-left:1.15rem;
+}
+.step-list li{
+  margin:0 0 .7rem;
+}
+.step-list li:last-child{margin-bottom:0;}
+.teacher-box ul,.homework-box ul{
+  margin:.35rem 0 0 1.1rem;
+}
+.teacher-box li,.homework-box li{margin:.45rem 0;}
+@media(max-width:860px){
+  .illus-grid{grid-template-columns:1fr;}
+  .illustration-head,.illustration-body{padding-inline:14px;}
+}
+
 </style>
 
 </head>
@@ -168,11 +336,15 @@ function setStatus(msg,kind=''){const el=$('auth-status');if(!el)return;el.textC
 function put(id,v){const el=$(id);if(el)el.textContent=(v&&String(v).trim())?String(v):'—'}
 function saveNav(){localStorage.setItem(navKey,JSON.stringify({section:state.section,page:state.page}));}
 async function api(body){const {data,error}=await client.functions.invoke('participation-api',{body});if(error)throw new Error(error.message||'Participation API error');if(data?.error)throw new Error(data.error);return data;}
+const ILLUSTRATIONS={"3.4": [{"title": "Depth-Limited Search (DLS) — step-by-step trace", "summary": "See exactly how DLS expands nodes until it reaches the depth limit and then cuts off deeper paths.", "trace": "Depth limit l = 2\nStart frontier: [Arad(0)]\n\nStep 1: Expand Arad\nNew frontier: [Sibiu(1), Timisoara(1), Zerind(1)]\n\nStep 2: Expand Sibiu\nNew frontier: [Fagaras(2), Rimnicu Vilcea(2), Oradea(2), Timisoara(1), Zerind(1)]\n\nStep 3: Try to go deeper from Fagaras\nCutoff: depth 3 would exceed l = 2\n\nContinue until frontier is exhausted or goal appears within limit.", "steps": ["Choose a maximum search depth before the search begins.", "Expand nodes in depth-first order, keeping track of each node’s depth.", "When a child would be deeper than the limit, do not expand it; mark it as a cutoff rather than a failure.", "If the goal is found before the limit, return the solution path. Otherwise, report either cutoff or failure."], "teacher": ["Why it matters: DLS protects depth-first search from wandering forever in very deep or infinite state spaces.", "Trade-off: it saves memory, but it can miss a shallow goal if the limit is too small."], "homework": ["When tracing DLS, write the current node, its depth, and whether each expansion is allowed or cut off.", "If the search stops because of the limit, say cutoff—not necessarily failure."]}, {"title": "Bidirectional Search — meeting in the middle", "summary": "Visualize two simultaneous searches: one forward from the start and one backward from the goal.", "trace": "Forward search from Arad: Arad -> {Sibiu, Timisoara, Zerind}\nBackward search from Bucharest: Bucharest -> {Fagaras, Pitesti, Giurgiu, Urziceni}\n\nNext forward layer adds Rimnicu Vilcea and Fagaras.\nNext backward layer already contains Fagaras.\n\nMeeting point: Fagaras\nConstruct final path by joining\nArad -> Sibiu -> Fagaras\nand\nFagaras -> Bucharest", "steps": ["Run one search from the initial state and another from the goal state.", "Maintain a frontier for each direction and expand one layer at a time.", "After each expansion, test whether the two frontiers intersect.", "When they meet, join the partial paths to obtain a full solution."], "teacher": ["Why it matters: when branching factors are large, meeting in the middle can reduce the total number of generated nodes.", "Important condition: the goal must be explicitly known and backward moves must be well defined."], "homework": ["If you are asked why bidirectional search can be faster, explain that each side searches roughly half the distance.", "Always state the meeting node clearly in your answer."]}], "3.5": [{"title": "Weighted A* — faster search by leaning harder on the heuristic", "summary": "Weighted A* changes the evaluation rule from f(n)=g(n)+h(n) to f(n)=g(n)+w·h(n), where w > 1.", "trace": "Assume w = 2\nNode A: g=4, h=6 => f=4 + 2(6) = 16\nNode B: g=7, h=3 => f=7 + 2(3) = 13\n\nSelection: choose Node B because it has the smaller weighted score.\nInterpretation: the algorithm is giving extra influence to the heuristic estimate.", "steps": ["Compute path cost so far, g(n), exactly as in A*.", "Compute heuristic estimate, h(n), exactly as in A*.", "Multiply the heuristic by a weight greater than 1.", "Choose the node with the smallest weighted evaluation function."], "teacher": ["Why it matters: Weighted A* often finds a good answer more quickly than ordinary A*.", "Trade-off: because the heuristic is over-emphasized, the returned path may no longer be optimal."], "homework": ["If asked to compare A* and Weighted A*, mention speed versus solution quality.", "Show the full arithmetic when computing the weighted f-value."]}, {"title": "IDA* — iterative deepening on the A* evaluation function", "summary": "IDA* repeatedly performs depth-first search with an f-cost threshold instead of a depth threshold.", "trace": "Initial threshold = h(start) = 11\nPass 1: explore only nodes with f <= 11\nSmallest exceeded value encountered = 13\n\nNew threshold = 13\nPass 2: explore only nodes with f <= 13\nSmallest exceeded value encountered = 15\n\nNew threshold = 15\nContinue until the goal is found within the threshold.", "steps": ["Start with a threshold equal to the initial state’s f-cost estimate.", "Run a depth-first search but prune any branch whose f-value exceeds the threshold.", "Record the smallest f-value that exceeded the threshold during that pass.", "Use that recorded value as the new threshold and repeat."], "teacher": ["Why it matters: IDA* uses much less memory than A* because it behaves like depth-first search.", "Trade-off: it may re-expand nodes many times across repeated passes."], "homework": ["Do not confuse the threshold with depth; in IDA* the threshold is based on f(n), not the level in the tree.", "When tracing, clearly show each threshold update."]}, {"title": "Beam Search — keep only the best few frontier nodes", "summary": "Beam search limits the frontier width to a fixed number, called the beam width k.", "trace": "Beam width k = 2\nGenerated nodes after expansion: A(h=4), B(h=2), C(h=7), D(h=3)\nSort by heuristic: B(2), D(3), A(4), C(7)\nKeep only top 2: [B, D]\nDiscard: [A, C]", "steps": ["Expand the current frontier and generate candidate successors.", "Score each candidate, usually with a heuristic function.", "Sort or rank candidates from most promising to least promising.", "Retain only the best k nodes and discard the rest."], "teacher": ["Why it matters: beam search controls memory and can be very fast in large spaces.", "Trade-off: because it discards nodes permanently, it is not guaranteed to be complete or optimal."], "homework": ["If you are given k and a list of heuristic scores, explicitly show which nodes survive and which are pruned.", "Mention the risk: a discarded node may belong to the best path."]}, {"title": "SMA* — Simplified Memory-Bounded A*", "summary": "SMA* behaves like A* until memory becomes full; then it deletes the least promising leaf while preserving backup information.", "trace": "Memory can hold only 4 leaves\nCurrent leaves: N1(f=8), N2(f=11), N3(f=14), N4(f=16)\nA new child N5(f=10) is generated\nMemory full => remove worst leaf N4(f=16)\nStore its best forgotten cost in its parent\nFrontier after pruning: N1, N2, N3, N5", "steps": ["Expand the best frontier node, as A* would do.", "If memory is not full, keep the generated children normally.", "If memory is full, delete the worst leaf node in memory.", "Back up the forgotten leaf’s best f-value to its parent so the branch can be reconsidered later if needed."], "teacher": ["Why it matters: SMA* keeps the best-first spirit of A* while respecting a strict memory limit.", "Trade-off: because nodes can be deleted and regenerated, repeated work may occur."], "homework": ["When explaining SMA*, always mention the memory limit explicitly.", "Use the phrase backup value or forgotten child cost when describing what is stored in the parent."]}, {"title": "Bidirectional Heuristic Search — informed search from both directions", "summary": "This approach combines the meet-in-the-middle idea with heuristic guidance on both the forward and backward searches.", "trace": "Forward frontier ordered by h_f: F1(5), F2(7), F3(9)\nBackward frontier ordered by h_b: B1(4), B2(6), B3(8)\nExpand best forward and backward candidates in alternation\nCheck whether any generated state appears in both explored regions\nWhen overlap occurs, stitch the two partial paths together", "steps": ["Maintain a forward search from the initial state and a backward search from the goal.", "Use heuristics to prioritize expansions in each direction.", "After each expansion, test for overlap between the two search regions.", "When the two searches connect, reconstruct the complete solution path."], "teacher": ["Why it matters: heuristics can reduce work on both sides, not just the forward search.", "Challenge: designing compatible heuristics and termination conditions is more complex than in ordinary bidirectional search."], "homework": ["If asked what makes it different from ordinary bidirectional search, mention heuristic guidance in both directions.", "If you discuss complexity, emphasize that coordination between the two searches is the hard part."]}], "3.6": [{"title": "Heuristic example — Misplaced Tiles vs. Manhattan Distance", "summary": "These two heuristics estimate remaining effort in the 8-puzzle, but one is usually more informative than the other.", "trace": "Suppose three tiles are not in their goal positions.\nMisplaced Tiles heuristic: h1 = 3\n\nSuppose those same tiles are 1, 2, and 3 moves away from their goal squares.\nManhattan Distance heuristic: h2 = 1 + 2 + 3 = 6\n\nConclusion: Manhattan distance captures more detail about how far each tile must travel.", "steps": ["Count how many tiles are not in the correct goal position to get the misplaced-tiles heuristic.", "For Manhattan distance, compute the row-distance plus column-distance for each tile.", "Add all tile distances together.", "Compare the values: the larger admissible heuristic usually gives better guidance."], "teacher": ["Why it matters: both heuristics are admissible, but Manhattan distance usually dominates misplaced tiles because it is more informed.", "Teaching point: more informative heuristics often reduce search effort."], "homework": ["When showing Manhattan distance, write each tile’s horizontal and vertical move count explicitly.", "If you compare heuristics, use the word dominates only when one is always at least as large and still admissible."]}, {"title": "How relaxed problems create heuristics", "summary": "A relaxed problem removes one or more constraints so the problem becomes easier to solve; the relaxed solution cost becomes a heuristic for the original problem.", "trace": "Original route-planning problem: obey traffic, road direction, and turn restrictions.\nRelaxed version: ignore turn restrictions.\n\nEasier problem => cheaper or equal solution cost.\nUse that cost as h(n) for the harder original problem.\nBecause the relaxed problem is easier, it never overestimates the true remaining cost.", "steps": ["Start with the original problem definition.", "Remove a constraint to create an easier version of the problem.", "Solve or estimate the easier version.", "Use that easier solution cost as the heuristic for the original problem."], "teacher": ["Why it matters: this is one of the main theoretical foundations for admissible heuristics.", "Examples include sliding-tile puzzles, route planning, and scheduling."], "homework": ["If asked why the heuristic stays admissible, explain that solving an easier problem cannot cost more than solving the harder one.", "Name the removed constraint in your explanation."]}, {"title": "Pattern Databases and Landmark Heuristics", "summary": "Both methods invest more computation up front so later search can be guided more intelligently.", "trace": "Pattern database idea:\nPrecompute exact costs for many subproblems\nLookup example state pattern -> heuristic value 12\n\nLandmark heuristic idea:\nRequired milestones to reach the goal: L1, L2, L3\nCurrent state has achieved only L1\nRemaining landmarks suggest more progress is still needed", "steps": ["Pattern databases: identify a useful subset or abstraction of the full problem.", "Precompute exact solution costs for those abstract states and store them in a table.", "Landmarks: identify states, facts, or tasks that every valid solution must pass through.", "Use those precomputed values or remaining landmarks to estimate how much work is left."], "teacher": ["Why it matters: strong heuristics are often built offline and then used cheaply online during search.", "Teaching point: heuristic design is not just about formulas; it is about exploiting problem structure."], "homework": ["For pattern databases, mention precomputation and table lookup.", "For landmark heuristics, mention that all solutions must satisfy the landmarks."]}]}
+
 function sectionToken(sec){return sec.replace('.','')}
 function studyKey(sec,i){return 'CS3-F-'+sectionToken(sec)+'-'+String(i+1).padStart(2,'0')}
 function questionKey(sec,i){return 'CS3-MC-'+sectionToken(sec)+'-'+String(i+1).padStart(2,'0')}
 function slideKey(n){return 'CS3-SL'+String(n).padStart(3,'0')}
 function secSlides(sec){const [a,b]=sec.range;return SLIDES.filter(s=>s.n>=a&&s.n<=b)}
+function sectionIllustrations(secId){return ILLUSTRATIONS[secId]||[]}
+function illustrationKey(secId,i){return 'CS3-ILL-'+sectionToken(secId)+'-'+String(i+1).padStart(2,'0')}
 function stripNote(t){return String(t||'').split('\n').filter(Boolean).join('\n').trim()}
 function takeaway(note){let x=String(note||'').split('\n').join(' ').split(/(?<=[.!?])\s+/).filter(Boolean);return x.slice(0,2).join(' ')}
 function escHtml(v){
@@ -220,7 +392,7 @@ function formatNotes(note){
   }
   return html.join('');
 }
-function totals(){return {slideTotal:SLIDES.length,cardTotal:Object.values(CARDS).reduce((a,x)=>a+x.length,0),qTotal:Object.values(MC).reduce((a,x)=>a+x.length,0)}}
+function totals(){const illTotal=Object.values(ILLUSTRATIONS).reduce((a,x)=>a+x.length,0);return {slideTotal:SLIDES.length+illTotal,cardTotal:Object.values(CARDS).reduce((a,x)=>a+x.length,0),qTotal:Object.values(MC).reduce((a,x)=>a+x.length,0)}}
 function hydrate(data){openedKeys.clear();for(const k of data.card_keys||[])openedKeys.add(k);attempted.clear();for(const r of data.knowledge_responses||[])attempted.set(r.question_key,r);completion=data.completion||completion;updateProgress();}
 function showIdentity(r,enrollment,offering){const s=enrollment?.section||{};currentSection=s;put('ai-student',r.user?.full_name);put('ai-email',r.user?.email);put('ai-course',[s.course?.code,s.course?.title].filter(Boolean).join(' — '));put('ai-term',[s.term?.name,s.term?.code].filter(Boolean).join(' · '));put('ai-section',[s.course?.code&&s.section_code?s.course.code+'-'+s.section_code:s.section_code,s.title].filter(Boolean).join(' — '));put('ai-student-id',r.user?.institutional_id||'Not listed');$('academic-identity').hidden=false;}
 function unlock(){ $('sectionPanel').classList.remove('hidden');render(); }
@@ -256,6 +428,33 @@ function observeSlides(){
   },{threshold:[0.45]});
   document.querySelectorAll('[data-slide-key]').forEach(el=>slideObserver.observe(el));
 }
+
+function renderIllustrations(sec){
+  const items=sectionIllustrations(sec.id);
+  if(!items.length)return '';
+  const blocks=items.map((it,ii)=>{
+    const steps=(it.steps||[]).map(x=>'<li>'+escHtml(x)+'</li>').join('');
+    const teacher=(it.teacher||[]).map(x=>'<li>'+escHtml(x)+'</li>').join('');
+    const homework=(it.homework||[]).map(x=>'<li>'+escHtml(x)+'</li>').join('');
+    return '<article class="lesson illustration-panel" data-slide-key="'+illustrationKey(sec.id,ii)+'">'+
+      '<div class="illustration-head">'+
+        '<div class="caption">Illustrative teaching slide</div>'+
+        '<h4>'+escHtml(it.title)+'</h4>'+
+        '<p>'+escHtml(it.summary||'')+'</p>'+
+        '<span class="illustration-note">Practice it here → Now repeat this in Colab or your notebook → Apply it to homework</span>'+
+      '</div>'+
+      '<div class="illustration-body">'+
+        '<div class="illus-grid">'+
+          '<div class="trace-box"><h5>Step-by-step illustration</h5><pre class="trace-diagram">'+escHtml(it.trace||'')+'</pre></div>'+
+          '<div class="steps-box"><h5>How to read the algorithm trace</h5><ol class="step-list">'+steps+'</ol></div>'+
+        '</div>'+
+        '<div class="teacher-box"><h5>Teaching moment</h5><ul>'+teacher+'</ul></div>'+
+        '<div class="homework-box"><h5>Apply it to homework or exams</h5><ul>'+homework+'</ul></div>'+
+      '</div></article>';
+  }).join('');
+  return '<section class="section-block"><h3>Illustrative teaching slides</h3><p>These guided slides slow the algorithm down so you can follow each decision, each frontier update, and each heuristic judgment one step at a time.</p>'+blocks+'</section>';
+}
+
 function render(){
   if(!sessionId)return;
   const p=$('sectionPanel');
@@ -274,6 +473,8 @@ function render(){
         '<div class="teach"><strong>Study move:</strong> Explain the slide aloud in your own words. For algorithm traces, say what is on the frontier and why the next node is selected.</div>'+
         '</div></article>';
     }).join('');
+
+    const illustrationHtml=renderIllustrations(sec);
 
     const cardsHtml='<section class="section-block"><h3>Study cards</h3><p>Open every card. Do not just memorize the term—connect it to the worked examples.</p><div class="cardsGrid">'+
       (CARDS[sec.id]||[]).map((c,i)=>{
@@ -298,11 +499,11 @@ function render(){
       }).join('')+'</div></section>';
 
     const top='<div class="sectionHead"><div><h2>'+sec.label+'</h2><p>'+sec.subtitle+'</p></div>'+
-      '<div class="counter">'+ss.length+' lecture visuals · '+(CARDS[sec.id]||[]).length+
+      '<div class="counter">'+(ss.length+sectionIllustrations(sec.id).length)+' lecture visuals · '+(CARDS[sec.id]||[]).length+
       ' study cards · '+(MC[sec.id]||[]).length+' questions</div></div>';
 
     return '<section class="section-block-wrap" id="section-'+sectionToken(sec.id)+'">'+
-      top+lectureHtml+cardsHtml+quizHtml+(sec.id==='review'?receipt():'')+
+      top+lectureHtml+illustrationHtml+cardsHtml+quizHtml+(sec.id==='review'?receipt():'')+
       '</section>';
   }).join('');
 
@@ -319,7 +520,7 @@ function render(){
   updateProgress();
 }
 async function checkQ(sec,qi){if(apiBusy)return;let r=document.querySelector('input[name="q-'+sectionToken(sec)+'-'+qi+'"]:checked'),fb=$('fb-'+sec+'-'+qi);if(!r){fb.textContent='Choose an answer first.';fb.className='feedback bad';return}apiBusy=true;try{const qk=questionKey(sec,qi),sel='abcd'[Number(r.value)],res=await api({action:'answer_knowledge',session_id:sessionId,question_key:qk,selected_answer:sel});attempted.set(qk,{question_key:qk,selected_answer:sel,is_correct:res.is_correct,attempt_no:res.attempt_no});completion=res.completion||completion;fb.textContent=res.is_correct?'Correct.':('Not yet. '+(res.explanation||'Review the matching lecture explanation and try again.'));fb.className='feedback '+(res.is_correct?'good':'bad');updateProgress();}catch(e){fb.textContent=e.message||String(e);fb.className='feedback bad'}finally{apiBusy=false}}
-function localDone(){let t=totals(),slides=0,cards=0;for(const sl of SLIDES)if(openedKeys.has(slideKey(sl.n)))slides++;for(const sec of SECTIONS)for(let i=0;i<(CARDS[sec.id]||[]).length;i++)if(openedKeys.has(studyKey(sec.id,i)))cards++;return {t,slides,cards,questions:attempted.size}}
+function localDone(){let t=totals(),slides=0,cards=0;for(const sl of SLIDES)if(openedKeys.has(slideKey(sl.n)))slides++;for(const [sid,arr] of Object.entries(ILLUSTRATIONS))for(let i=0;i<arr.length;i++)if(openedKeys.has(illustrationKey(sid,i)))slides++;for(const sec of SECTIONS)for(let i=0;i<(CARDS[sec.id]||[]).length;i++)if(openedKeys.has(studyKey(sec.id,i)))cards++;return {t,slides,cards,questions:attempted.size}}
 function updateProgress(){let d=localDone(),done=d.slides+d.cards+d.questions,all=d.t.slideTotal+d.t.cardTotal+d.t.qTotal,pct=all?Math.round(done/all*100):0;if(completion&&typeof completion.completion_percentage==='number')pct=Math.round(completion.completion_percentage);$('progressText').textContent='Recorded progress: '+pct+'% · '+done+'/'+all+' required interactions';$('barFill').style.width=pct+'%';let btn=$('pdfBtn');if(btn)btn.disabled=completion?.status!=='complete';let rs=$('receiptSummary');if(rs)rs.textContent=receiptText();}
 function receipt(){return '<div class="receipt"><h3>Completion & submission</h3><p>Your receipt is generated from the authoritative Supabase completion record. The PDF button becomes available only after the server marks this participation complete.</p><div class="summary" id="receiptSummary">'+receiptText()+'</div><button class="primary" id="pdfBtn" onclick="downloadPDF()" '+(completion?.status==='complete'?'':'disabled')+'>Download participation PDF</button></div>'}
 function receiptText(){let d=localDone();return 'CS650 Chapter 3 Participation\nStudent: '+(currentUser?.user_metadata?.full_name||$('ai-student')?.textContent||'—')+'\nEmail: '+(currentUser?.email||'—')+'\nSection: '+($('ai-section')?.textContent||'—')+'\nLecture pages viewed: '+d.slides+'/'+d.t.slideTotal+'\nStudy cards opened: '+d.cards+'/'+d.t.cardTotal+'\nKnowledge checks attempted: '+d.questions+'/'+d.t.qTotal+'\nServer status: '+(completion?.status||'in progress')+'\nVerification: '+(completion?.verification_code||'pending')}
