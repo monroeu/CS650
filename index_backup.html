@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS650 — Artificial Intelligence</title>
+<meta name="description" content="CS650 Artificial Intelligence course hub at Monroe University.">
+<style>
+:root{
+  --paper:#F3EEDF; --stripe:#E7ECE3; --ink:#1E2A22; --ink-soft:#5B6459;
+  --rule:#B9AF95; --amber:#8A4419; --teal:#2F6F63; --teal-soft:#D9E8E3;
+  --white:#FBF9F1; --shadow:0 12px 30px rgba(30,42,34,.10);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;color:var(--ink);
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:repeating-linear-gradient(var(--paper),var(--paper) 26px,var(--stripe) 26px,var(--stripe) 52px);
+  line-height:1.65;
+}
+a{color:inherit}
+.skip{position:absolute;top:-60px;left:16px;background:var(--ink);color:white;padding:10px 14px;z-index:100}
+.skip:focus{top:12px}
+.topbar{
+  background:rgba(251,249,241,.96);
+  border-bottom:1px solid var(--rule);
+  position:sticky;top:0;z-index:50;
+  backdrop-filter:blur(8px)
+}
+.topbar-inner{
+  max-width:1180px;margin:0 auto;padding:14px 24px;
+  display:flex;justify-content:space-between;align-items:center;gap:24px
+}
+.brand{
+  font-family:Georgia,"Times New Roman",serif;
+  font-weight:700;font-size:20px;letter-spacing:.01em
+}
+.brand small{
+  display:block;
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:11px;color:var(--ink-soft);font-weight:600;
+  letter-spacing:.08em;text-transform:uppercase;margin-top:2px
+}
+.topnav{display:flex;gap:18px;flex-wrap:wrap;font-size:14px}
+.topnav a{text-decoration:none;color:var(--ink-soft);font-weight:600}
+.topnav a:hover{color:var(--amber)}
+main{max-width:1180px;margin:0 auto;padding:56px 24px 100px}
+
+.hero{
+  display:grid;
+  grid-template-columns:minmax(0,1.35fr) minmax(280px,.65fr);
+  gap:54px;align-items:center;padding:42px 0 64px
+}
+.eyebrow{
+  font-size:13px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--teal);font-weight:700;margin:0 0 14px
+}
+h1,h2,h3{font-family:Georgia,"Times New Roman",serif;line-height:1.12}
+h1{font-size:clamp(42px,6vw,74px);margin:0 0 20px;max-width:11ch}
+.hero-lede{max-width:62ch;font-size:19px;margin:0 0 28px}
+.hero-actions{display:flex;flex-wrap:wrap;gap:12px}
+.btn{
+  display:inline-block;text-decoration:none;border:1px solid var(--ink);
+  padding:11px 16px;font-weight:700;font-size:14px;background:var(--white)
+}
+.btn.primary{background:var(--ink);color:white}
+.btn:hover{transform:translateY(-1px)}
+
+.portrait-card{
+  background:var(--white);border:1px solid var(--rule);
+  padding:16px;box-shadow:var(--shadow)
+}
+.portrait-card img{
+  width:100%;aspect-ratio:4/5;object-fit:cover;object-position:center 28%;
+  display:block;border:1px solid var(--rule)
+}
+.portrait-caption{padding:14px 4px 2px}
+.portrait-caption strong{
+  display:block;font-family:Georgia,"Times New Roman",serif;font-size:22px
+}
+.portrait-caption span{color:var(--ink-soft);font-size:14px}
+
+.section{border-top:1px solid var(--rule);padding:64px 0 8px}
+.section h2{font-size:36px;margin:0 0 18px}
+.section-intro{color:var(--ink-soft);max-width:72ch;margin-bottom:28px}
+
+.professor-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.card{
+  background:rgba(251,249,241,.95);
+  border:1px solid var(--rule);padding:26px;
+  box-shadow:0 4px 16px rgba(30,42,34,.05)
+}
+.card h3{margin:0 0 12px;font-size:23px}
+.card p:last-child{margin-bottom:0}
+
+.course-facts{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:14px;margin-top:22px
+}
+.fact{
+  background:var(--teal-soft);
+  border:1px solid rgba(47,111,99,.25);
+  padding:18px
+}
+.fact b{
+  display:block;font-size:12px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--teal);margin-bottom:6px
+}
+
+.activities{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:16px
+}
+.activity{
+  background:var(--white);border:1px solid var(--rule);
+  padding:20px;min-height:205px;
+  display:flex;flex-direction:column;justify-content:space-between
+}
+.activity.active{
+  border:2px solid var(--amber);
+  background:linear-gradient(180deg,var(--white),#fff8ef)
+}
+.activity-num{
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink-soft);font-weight:700
+}
+.activity h3{font-size:21px;margin:10px 0 10px}
+.activity p{color:var(--ink-soft);font-size:14px;margin:0 0 18px}
+.activity .status{
+  font-size:12px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.06em;color:var(--teal)
+}
+.activity .status.soon{color:var(--ink-soft)}
+.activity a{text-decoration:none;font-weight:700;color:var(--amber)}
+
+.objectives{columns:2;column-gap:42px;padding-left:20px}
+.objectives li{break-inside:avoid;margin-bottom:12px}
+
+.notice{
+  background:rgba(217,232,227,.78);
+  border-left:4px solid var(--teal);
+  padding:18px 20px;
+  margin:24px 0 0
+}
+footer{
+  margin-top:80px;padding:28px 0 10px;
+  border-top:1px solid var(--rule);color:var(--ink-soft);font-size:14px
+}
+
+@media (max-width:900px){
+  .hero{grid-template-columns:1fr}
+  .portrait-card{max-width:430px}
+  .professor-grid{grid-template-columns:1fr}
+  .course-facts{grid-template-columns:1fr}
+  .activities{grid-template-columns:1fr 1fr}
+}
+@media (max-width:620px){
+  .topbar-inner{align-items:flex-start;flex-direction:column}
+  .topnav{gap:12px}
+  .activities{grid-template-columns:1fr}
+  .objectives{columns:1}
+  main{padding-left:18px;padding-right:18px}
+}
+</style>
+</head>
+
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      CS650
+      <small>Artificial Intelligence</small>
+    </div>
+    <nav class="topnav" aria-label="Course navigation">
+      <a href="#professor">Professor</a>
+      <a href="#course">Course</a>
+      <a href="#activities">Participation</a>
+      <a href="#objectives">Learning Objectives</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <section class="hero">
+    <div>
+      <p class="eyebrow">Monroe University · King Graduate School</p>
+      <h1>Artificial Intelligence</h1>
+      <p class="hero-lede">
+        Welcome to CS650. This course introduces the principles and methods that allow
+        intelligent systems to represent problems, reason about alternatives, search for
+        solutions, and make informed decisions.
+      </p>
+
+      <div class="hero-actions">
+        <a class="btn primary" href="#activities">View Participation Activities</a>
+        <a class="btn" href="#professor">Meet Your Professor</a>
+      </div>
+    </div>
+
+    <aside class="portrait-card" aria-label="Professor Fomba Kassoh">
+      <img src="assets/professor-fomba-kassoh.jpeg"
+           alt="Professor Fomba Kassoh"
+           onerror="this.style.display='none';this.parentElement.style.minHeight='180px';">
+      <div class="portrait-caption">
+        <strong>Professor Fomba Kassoh</strong>
+        <span>Instructor · CS650</span>
+      </div>
+    </aside>
+  </section>
+
+  <section class="section" id="professor">
+    <p class="eyebrow">Meet Your Professor</p>
+    <h2>Welcome to the course</h2>
+
+    <div class="professor-grid">
+      <article class="card">
+        <h3>Hello everyone</h3>
+        <p>
+          My name is <strong>Professor Fomba Kassoh</strong>, and I will be your
+          instructor for this course.
+        </p>
+        <p>
+          My academic and professional background spans
+          <strong>Data Science, Artificial Intelligence, Business Analytics,
+          Civil Engineering, Transportation, and Water Resources</strong>.
+          In addition to teaching at <strong>Monroe University</strong>, I work
+          in the transportation industry, where I manage technology and
+          operational projects involving data, automated systems, and decision-making.
+        </p>
+      </article>
+
+      <article class="card">
+        <h3>How we will learn</h3>
+        <p>
+          My goal is to help you move beyond memorizing AI terminology.
+          We will use examples, visual explanations, algorithm traces, Python code,
+          and interactive participation activities to understand
+          <strong>how intelligent systems solve problems</strong>.
+        </p>
+        <p>
+          You will be expected to explain not only what an algorithm does,
+          but why it behaves that way, when it should be used, and what tradeoffs it makes.
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <section class="section" id="course">
+    <p class="eyebrow">Course Overview</p>
+    <h2>What CS650 is about</h2>
+    <p class="section-intro">
+      CS650 develops a practical and conceptual understanding of artificial intelligence.
+      Students learn how intelligent agents represent problems, explore alternatives,
+      use search algorithms, apply heuristics, and reason about the quality and efficiency
+      of solutions.
+    </p>
+
+    <div class="course-facts">
+      <div class="fact">
+        <b>Course</b>
+        CS650 Artificial Intelligence
+      </div>
+      <div class="fact">
+        <b>Current Module</b>
+        AIMA Chapter 3 — Solving Problems by Searching
+      </div>
+      <div class="fact">
+        <b>Learning Mode</b>
+        Lecture · Worked Traces · Python · Interactive Participation
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="activities">
+    <p class="eyebrow">Interactive Participation</p>
+    <h2>Your course activity hub</h2>
+    <p class="section-intro">
+      Participation modules combine lecture explanations, diagrams, algorithm walkthroughs,
+      study cards, and knowledge checks. Open only the participation module assigned by
+      Professor Kassoh for the current class period.
+    </p>
+
+    <div class="activities">
+      <article class="activity active">
+        <div>
+          <div class="activity-num">Chapter 3</div>
+          <h3>Solving Problems by Searching</h3>
+          <p>
+            Problem-solving agents, state spaces, search trees, BFS, UCS, DFS,
+            iterative deepening, greedy search, A*, admissibility, consistency,
+            and heuristic design.
+          </p>
+        </div>
+        <div>
+          <div class="status">Available now</div>
+          <a href="week03/">Open Chapter 3 →</a>
+        </div>
+      </article>
+
+      <article class="activity">
+        <div>
+          <div class="activity-num">Next Module</div>
+          <h3>Additional CS650 Participation</h3>
+          <p>
+            Additional course participation modules will be published as the semester progresses.
+          </p>
+        </div>
+        <div class="status soon">Coming soon</div>
+      </article>
+
+      <article class="activity">
+        <div>
+          <div class="activity-num">Submission</div>
+          <h3>Participation Receipt</h3>
+          <p>
+            Complete the assigned module while signed in. When the server verifies completion,
+            download the PDF participation receipt and submit it through Blackboard.
+          </p>
+        </div>
+        <div class="status">Supabase verified</div>
+      </article>
+    </div>
+
+    <div class="notice">
+      <strong>Important:</strong> Students should complete only the participation assignment
+      assigned for the current class session. Future modules should not be completed unless
+      Professor Kassoh specifically instructs you to do so.
+    </div>
+  </section>
+
+  <section class="section" id="objectives">
+    <p class="eyebrow">Current Learning Objectives</p>
+    <h2>What you should be able to do</h2>
+    <ul class="objectives">
+      <li>Formulate a task as a search problem using states, actions, a transition model, goal test, and action cost.</li>
+      <li>Explain the distinction between a state space, search tree, frontier, and reached set.</li>
+      <li>Trace breadth-first, depth-first, and uniform-cost search step by step.</li>
+      <li>Compare search strategies using completeness, cost optimality, time complexity, and space complexity.</li>
+      <li>Explain the difference between uninformed and informed search.</li>
+      <li>Explain how greedy best-first search uses a heuristic.</li>
+      <li>Explain how A* combines path cost g(n) with heuristic cost h(n).</li>
+      <li>Explain admissibility, consistency, and why heuristic quality matters.</li>
+      <li>Connect classical search techniques to routing, robotics, puzzles, scheduling, and other AI applications.</li>
+    </ul>
+  </section>
+
+  <footer>
+    CS650 · Artificial Intelligence · Monroe University
+  </footer>
+
+</main>
+<script src="assets/week-auto-activate.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+PASS - Previous button removed
+PASS - Next button removed
+PASS - IntersectionObserver used
+PASS - Mobile radio sizing present
+PASS - All lecture rendering present
+PASS - Supabase login preserved
+PASS - PDF receipt preserved
