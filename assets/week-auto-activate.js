@@ -140,6 +140,7 @@
         <nav class="cs650-nav-links" id="cs650-nav-links" aria-label="CS650 course navigation">
           <a data-cs650-nav="home" href="${CONFIG.homeBase.href}">Home</a>
           <span id="cs650-dynamic-week-links" style="display:contents"></span>
+          <a data-cs650-nav="instructor" href="/instructor/">Instructor</a>
         </nav>
       </div>`;
     document.body.insertBefore(root, document.body.firstChild);
