@@ -366,7 +366,7 @@ nav.sections{display:none!important}
 <section class="authbox" id="authBox">
 <h2 style="margin-top:0">Student Login</h2>
 <p>Sign in with your Monroe University Student ID. Your name, course, term, section, and school email are resolved from the instructor roster and cannot be changed from this page.</p>
-<div id="authFields"><div class="authgrid"><div><label>Student ID</label><input id="auth-student-id" inputmode="numeric" autocomplete="username" placeholder="Monroe University Student ID"></div><div><label>Password</label><input id="auth-password" type="password" autocomplete="current-password" placeholder="Password"></div><div><label>&nbsp;</label><div class="gate-note" style="margin-top:8px">First visit? Enter your Student ID, choose a password of at least 8 characters, then select <strong>Create account</strong>. <span style="white-space:nowrap;color:#61736b;font-size:.82em">Student ID Login v2</span></div></div></div><div class="authactions"><button class="primary" id="auth-signin">Sign in</button><button class="primary" id="auth-signup">Create account</button></div></div>
+<div id="authFields"><div class="authgrid"><div><label>Student ID</label><input id="auth-student-id" inputmode="numeric" autocomplete="username" placeholder="Monroe University Student ID"></div><div><label>Password</label><input id="auth-password" type="password" autocomplete="current-password" placeholder="Password"></div><div><label>&nbsp;</label><div class="gate-note" style="margin-top:8px">First visit? Enter your Student ID, choose a password of at least 8 characters, then select <strong>Create account</strong>. <span style="white-space:nowrap;color:#61736b;font-size:.82em">Student ID Login v3</span></div></div></div><div class="authactions"><button class="primary" id="auth-signin">Sign in</button><button class="primary" id="auth-signup">Create account</button></div></div>
 <div class="authactions"><button class="primary" id="auth-signout" hidden>Sign out</button></div>
 <div id="auth-status" class="gate-note">Sign in before beginning. Work completed while signed out cannot be credited.</div>
 <div id="academic-identity" class="identity" hidden><span class="server-badge">Roster verified</span><div class="identity-grid" style="margin-top:8px"><div><span>Student</span><strong id="ai-student">—</strong></div><div><span>School email</span><strong id="ai-email">—</strong></div><div><span>Course</span><strong id="ai-course">—</strong></div><div><span>Term</span><strong id="ai-term">—</strong></div><div><span>Section</span><strong id="ai-section">—</strong></div><div><span>Student ID</span><strong id="ai-student-id">—</strong></div></div></div>
@@ -507,8 +507,14 @@ async function studentAuth(action){
   const studentId=$('auth-student-id').value.trim(),password=$('auth-password').value;
   if(!studentId)throw new Error('Enter your Student ID.');
   if(password.length<8)throw new Error('Password must be at least 8 characters.');
-  const {data,error}=await client.functions.invoke('student-auth-api',{body:{action,student_id:studentId,password}});
-  if(error)throw new Error(error.message||'Student account service error');
+  const response=await fetch(`${SUPABASE_URL}/functions/v1/student-auth-api`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`},
+    body:JSON.stringify({action,student_id:studentId,password})
+  });
+  let data=null;
+  try{data=await response.json()}catch(_){ }
+  if(!response.ok)throw new Error(data?.error||`Student account service error (${response.status})`);
   if(data?.error)throw new Error(data.error);
   return data;
 }
