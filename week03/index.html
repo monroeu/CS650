@@ -348,6 +348,9 @@ nav.sections{display:none!important}
 .resume-strip button{min-height:40px}
 .primary:focus-visible,.card:focus-visible,.opt:focus-within,input:focus-visible,button:focus-visible{outline:3px solid #2f6f63;outline-offset:2px}
 .feedback[role="status"]{border-radius:4px;padding:10px 12px}
+.concept-paragraph{margin:14px 0;line-height:1.65}
+.concept-lead{font-weight:800;color:var(--ink);letter-spacing:.01em}
+@media(max-width:620px){.concept-paragraph{margin:16px 0}.concept-lead{display:inline;font-size:1.02em}}
 @media(max-width:620px){.resume-strip{top:94px;margin-inline:10px}}
 
 </style>
@@ -435,6 +438,52 @@ function takeaway(note){let x=String(note||'').split('\n').join(' ').split(/(?<=
 function escHtml(v){
   return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
+const NOTE_LEADINS=[
+  'Goal formulation','Problem formulation','Search','Execution','Open-loop','Closed-loop',
+  'States','State space','Initial state','Goal state','Goal states','Actions','Transition model','Action cost',
+  'Path','Solution','Optimal solution','Abstraction','Standardized problem','Real-world problem',
+  'Search tree','Frontier','Reached','Reached set','Expand','Generate','Node','Priority queue','FIFO queue','LIFO queue',
+  'Repeated state','Cycle','Redundant path','Graph search','Tree-like search',
+  'Completeness','Cost optimality','Time complexity','Space complexity','Branching factor',
+  'Breadth-first search','BFS','Uniform-cost search','UCS','Depth-first search','DFS',
+  'Depth-limited search','Iterative deepening','Bidirectional search',
+  'Heuristic','Heuristic function','Greedy best-first search','Greedy','A*','A-star',
+  'Admissible heuristic','Admissibility','Consistent heuristic','Consistency','Weighted A*',
+  'Misplaced-tile heuristic','Manhattan heuristic','Dominance','Relaxed problem','Pattern database','Landmark heuristic',
+  'Key idea','Remember','Why it matters','Complete','Cost-optimal','Optimal','Time','Space'
+];
+function emphasizeLeadIn(sentence){
+  let s=String(sentence||'').trim();
+  if(!s)return '';
+
+  // Normalize the four-phase narration into explicit instructional subheadings.
+  const phasePatterns=[
+    [/^Phase one,\s*goal formulation[.:]?\s*/i,'Goal Formulation'],
+    [/^Phase two,\s*problem formulation[.:]?\s*/i,'Problem Formulation'],
+    [/^Phase three,\s*search[.:]?\s*/i,'Search'],
+    [/^Phase four,\s*execution[.:]?\s*/i,'Execution']
+  ];
+  for(const [re,label] of phasePatterns){
+    if(re.test(s)){
+      const rest=s.replace(re,'').trim();
+      return '<p class="concept-paragraph"><strong class="concept-lead">'+escHtml(label)+':</strong> '+escHtml(rest)+'</p>';
+    }
+  }
+
+  // Turn clear definition/topic openings into bold lead-ins without over-formatting normal prose.
+  const sorted=NOTE_LEADINS.slice().sort((a,b)=>b.length-a.length);
+  for(const term of sorted){
+    const escaped=term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    const re=new RegExp('^'+escaped+'\\s*(?:[:—–-]|is\\b|means\\b|asks\\b|uses\\b|expands\\b|tests\\b|=)?\\s*','i');
+    if(re.test(s)){
+      let rest=s.replace(re,'').trim();
+      // Avoid awkward headings when the sentence is only the term itself.
+      if(!rest) return '<p class="concept-paragraph"><strong class="concept-lead">'+escHtml(term)+'</strong></p>';
+      return '<p class="concept-paragraph"><strong class="concept-lead">'+escHtml(term)+':</strong> '+escHtml(rest)+'</p>';
+    }
+  }
+  return '';
+}
 function formatNotes(note){
   const raw=String(note||'').replace(/\r/g,'').trim();
   if(!raw)return '';
@@ -445,7 +494,7 @@ function formatNotes(note){
   for(const block of blocks){
     const lines=block.split('\n').map(x=>x.trim()).filter(Boolean);
 
-    // Convert obvious enumerations to bullets
+    // Convert obvious enumerations to bullets.
     const enumerated = lines.length >= 2 && lines.every((line,i)=>
       /^(\d+[\).]|[-•]\s|One:|Two:|Three:|Four:|Five:|Six:|First,|Second,|Third,|Finally,)/i.test(line)
     );
@@ -462,18 +511,24 @@ function formatNotes(note){
       continue;
     }
 
-    // If a block contains repeated teaching transitions, split into paragraphs
     const text=lines.join(' ');
     const sentences=text.split(/(?<=[.!?])\s+/).filter(Boolean);
     let current=[];
-    for(const s of sentences){
-      current.push(s);
-      if(current.length>=3){
-        html.push('<p>'+escHtml(current.join(' '))+'</p>');
-        current=[];
+    const flush=()=>{
+      if(current.length){html.push('<p>'+escHtml(current.join(' '))+'</p>');current=[];}
+    };
+
+    for(const sentence of sentences){
+      const emphasized=emphasizeLeadIn(sentence);
+      if(emphasized){
+        flush();
+        html.push(emphasized);
+      }else{
+        current.push(sentence);
+        if(current.length>=3)flush();
       }
     }
-    if(current.length) html.push('<p>'+escHtml(current.join(' '))+'</p>');
+    flush();
   }
   return html.join('');
 }
