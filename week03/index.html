@@ -658,7 +658,7 @@ function render(){
     const cardsHtml='<section class="section-block"><h3>Study cards</h3><p>Open every card. Do not just memorize the term—connect it to the worked examples.</p><div class="cardsGrid">'+
       (CARDS[sec.id]||[]).map((c,i)=>{
         const k=studyKey(sec.id,i);
-        return '<div class="card '+(openedKeys.has(k)?'open':'')+'" data-card="'+k+'"><div class="term">'+c[0]+'</div><div class="small">Tap to reveal</div><div class="answer">'+c[1]+'</div></div>';
+        return '<div class="card '+(openedKeys.has(k)?'open':'')+'" data-card="'+k+'"><div class="term">'+c[0]+'</div><div class="small card-hint">'+(openedKeys.has(k)?'Tap to hide':'Tap to reveal')+'</div><div class="answer">'+c[1]+'</div></div>';
       }).join('')+'</div></section>';
 
     const quizHtml='<section class="section-block"><h3>Knowledge check</h3><p>Answer every question carefully. You have one attempt per question. After you submit an answer, the question is locked and the teaching explanation is shown.</p><div class="quiz">'+
@@ -691,6 +691,8 @@ function render(){
   setTimeout(()=>{
     document.querySelectorAll('[data-card]').forEach(el=>el.onclick=()=>{
       el.classList.toggle('open');
+      const hint=el.querySelector('.card-hint');
+      if(hint)hint.textContent=el.classList.contains('open')?'Tap to hide':'Tap to reveal';
       if(el.classList.contains('open'))recordCard(el.dataset.card);
     });
     observeSlides();
