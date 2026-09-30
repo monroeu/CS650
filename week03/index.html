@@ -456,34 +456,146 @@ function emphasizeLeadIn(sentence){
   let s=String(sentence||'').trim();
   if(!s)return '';
 
-  // Normalize the four-phase narration into explicit instructional subheadings.
-  const phasePatterns=[
+  const rules=[
     [/^Phase one,\s*goal formulation[.:]?\s*/i,'Goal Formulation'],
     [/^Phase two,\s*problem formulation[.:]?\s*/i,'Problem Formulation'],
     [/^Phase three,\s*search[.:]?\s*/i,'Search'],
-    [/^Phase four,\s*execution[.:]?\s*/i,'Execution']
+    [/^Phase four,\s*execution[.:]?\s*/i,'Execution'],
+
+    [/^In a fully observable, deterministic, known environment,/i,'Open-Loop'],
+    [/^If the model is correct,/i,'Open-Loop Execution'],
+    [/^But if the model might be wrong, or the world is nondeterministic,/i,'Closed-Loop'],
+    [/^Then the agent should use a closed-loop approach,/i,'Closed-Loop Control'],
+    [/^And in partially observable or nondeterministic worlds,/i,'Contingency Planning'],
+
+    [/^A set of states\b/i,'State Space'],
+    [/^States:\s*/i,'States'],
+    [/^An initial state\b/i,'Initial State'],
+    [/^Initial state:\s*/i,'Initial State'],
+    [/^One or more goal states\b/i,'Goal States'],
+    [/^Goal(?: states?)?:\s*/i,'Goal State'],
+    [/^The actions available in each state\b/i,'Actions'],
+    [/^Actions:\s*/i,'Actions'],
+    [/^A transition model\b/i,'Transition Model'],
+    [/^Transition model:\s*/i,'Transition Model'],
+    [/^And an action cost function\b/i,'Action Cost'],
+    [/^Action cost:\s*/i,'Action Cost'],
+
+    [/^A sequence of actions forms a path\b/i,'Path'],
+    [/^A solution is a path\b/i,'Solution'],
+    [/^An optimal solution\b/i,'Optimal Solution'],
+    [/^We assume action costs are additive\b/i,'Path Cost'],
+    [/^We also assume every action cost is positive\b/i,'Positive Action Costs'],
+    [/^Finally, the state space is a graph\b/i,'State-Space Graph'],
+
+    [/^Removing detail like this is called abstraction\b/i,'Abstraction'],
+    [/^The abstraction is valid if\b/i,'Valid Abstraction'],
+    [/^And it is useful if\b/i,'Useful Abstraction'],
+
+    [/^Standardized problems are\b/i,'Standardized Problems'],
+    [/^Real-world problems are\b/i,'Real-World Problems'],
+    [/^Sokoban:\s*/i,'Sokoban'],
+    [/^Then sliding-tile puzzles\b/i,'Sliding-Tile Puzzles'],
+    [/^Route finding\b/i,'Route Finding'],
+    [/^Airline travel planning\b/i,'Airline Travel Planning'],
+    [/^Touring problems\b/i,'Touring Problems'],
+    [/^VLSI layout\b/i,'VLSI Layout'],
+    [/^Robot navigation\b/i,'Robot Navigation'],
+
+    [/^The state space is the set of states\b/i,'State Space'],
+    [/^The search tree is the set of paths\b/i,'Search Tree'],
+    [/^To expand a node\b/i,'Expand'],
+    [/^The frontier is the set of nodes\b/i,'Frontier'],
+    [/^A state is reached once\b/i,'Reached Set'],
+    [/^The frontier separates the state space\b/i,'Separation Property'],
+    [/^A priority queue pops\b/i,'Priority Queue'],
+    [/^A FIFO queue\b/i,'FIFO Queue'],
+    [/^A LIFO queue\b/i,'LIFO Stack'],
+    [/^A cycle is a special case\b/i,'Cycle / Redundant Path'],
+    [/^Remember everything\b/i,'Graph Search'],
+    [/^Remember nothing\b/i,'Tree-Like Search'],
+
+    [/^Completeness:\s*/i,'Completeness'],
+    [/^Cost optimality:\s*/i,'Cost Optimality'],
+    [/^Time complexity:\s*/i,'Time Complexity'],
+    [/^Space complexity:\s*/i,'Space Complexity'],
+    [/^b, the branching factor\b/i,'Branching Factor (b)'],
+    [/^d, the depth of the shallowest solution\b/i,'Solution Depth (d)'],
+    [/^m, the maximum depth\b/i,'Maximum Depth (m)'],
+
+    [/^First: breadth means\b/i,'Breadth-First Principle'],
+    [/^Second: the data structure\b/i,'FIFO Queue'],
+    [/^Complete\?/i,'Completeness'],
+    [/^Cost-optimal\?/i,'Cost Optimality'],
+    [/^Time and space:/i,'Time & Space Complexity'],
+    [/^We use best-first search with the evaluation function equal to the path cost/i,'Uniform-Cost Search'],
+    [/^The frontier is now a priority queue/i,'UCS Frontier'],
+    [/^The goal test happens right after the pop/i,'Late Goal Test'],
+    [/^DFS is not cost-optimal/i,'Cost Optimality'],
+    [/^Is it complete\?/i,'Completeness'],
+    [/^So why would anyone use it\?/i,'Memory Advantage'],
+    [/^Depth-limited search is DFS with a depth limit/i,'Depth-Limited Search'],
+    [/^The catch: choose ell badly/i,'Depth-Limit Trade-off'],
+    [/^Iterative deepening solves/i,'Iterative Deepening'],
+    [/^So iterative deepening gets the best of both worlds/i,'Why Iterative Deepening Works'],
+    [/^Instead of searching only forward from the start/i,'Bidirectional Search'],
+
+    [/^The hint comes in the form of a heuristic function/i,'Heuristic h(n)'],
+    [/^h of n is the estimated cost/i,'Heuristic Definition'],
+    [/^For route finding, the natural heuristic/i,'Straight-Line Distance'],
+    [/^The simplest way to use a heuristic/i,'Greedy Best-First Search'],
+    [/^The evaluation function is just f of n equals h of n/i,'Greedy Evaluation'],
+    [/^A-star is best-first search with f of n equals g of n plus h of n/i,'A* Evaluation'],
+    [/^g of n is what you have already paid/i,'g(n): Cost So Far'],
+    [/^h of n is the estimated cost from n to the goal/i,'h(n): Estimated Cost to Goal'],
+    [/^So f of n is the estimated cost/i,'f(n): Estimated Total Cost'],
+    [/^The key property is admissibility/i,'Admissibility'],
+    [/^An admissible heuristic never overestimates/i,'Admissible Heuristic'],
+    [/^A slightly stronger property is consistency/i,'Consistency'],
+    [/^A heuristic is consistent if/i,'Consistent Heuristic'],
+    [/^This is the triangle inequality/i,'Triangle Inequality'],
+    [/^Draw a line around every node with f/i,'Search Contours'],
+    [/^The catch: for many problems/i,'A* Limitation'],
+    [/^Weighted A-star generalizes that/i,'Weighted A*'],
+    [/^Beam search keeps only the k best nodes/i,'Beam Search'],
+    [/^Iterative-deepening A-star/i,'IDA*'],
+    [/^Recursive best-first search/i,'RBFS'],
+    [/^And SMA-star/i,'SMA*'],
+
+    [/^h-one: the number of misplaced tiles/i,'Misplaced-Tile Heuristic h₁'],
+    [/^h-two: the sum of each tile/i,'Manhattan Heuristic h₂'],
+    [/^How do we measure how good a heuristic is\?/i,'Heuristic Accuracy'],
+    [/^One way is the effective branching factor/i,'Effective Branching Factor b*'],
+    [/^Because h-two dominates h-one/i,'Dominance'],
+    [/^A problem with fewer restrictions/i,'Relaxed Problem'],
+    [/^A pattern database stores/i,'Pattern Database'],
+    [/^Instead, pick a few landmark points/i,'Landmarks'],
+    [/^The differential heuristic subtracts/i,'Differential Heuristic'],
+    [/^First, learning to search better/i,'Learning to Search'],
+    [/^Second, learning heuristics from experience/i,'Learning Heuristics']
   ];
-  for(const [re,label] of phasePatterns){
+
+  for(const [re,label] of rules){
     if(re.test(s)){
-      const rest=s.replace(re,'').trim();
+      let rest=s.replace(re,'').trim();
+      if(!rest) rest=s;
       return '<p class="concept-paragraph"><strong class="concept-lead">'+escHtml(label)+':</strong> '+escHtml(rest)+'</p>';
     }
   }
 
-  // Turn clear definition/topic openings into bold lead-ins without over-formatting normal prose.
   const sorted=NOTE_LEADINS.slice().sort((a,b)=>b.length-a.length);
   for(const term of sorted){
     const escaped=term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
     const re=new RegExp('^'+escaped+'\\s*(?:[:—–-]|is\\b|means\\b|asks\\b|uses\\b|expands\\b|tests\\b|=)?\\s*','i');
     if(re.test(s)){
       let rest=s.replace(re,'').trim();
-      // Avoid awkward headings when the sentence is only the term itself.
       if(!rest) return '<p class="concept-paragraph"><strong class="concept-lead">'+escHtml(term)+'</strong></p>';
       return '<p class="concept-paragraph"><strong class="concept-lead">'+escHtml(term)+':</strong> '+escHtml(rest)+'</p>';
     }
   }
   return '';
 }
+
 function formatNotes(note){
   const raw=String(note||'').replace(/\r/g,'').trim();
   if(!raw)return '';
