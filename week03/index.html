@@ -362,11 +362,11 @@ nav.sections{display:none!important}
   <div class="small" id="progressText">Question progress: 0%</div><div class="savedStatus" id="savedStatus" aria-live="polite">Not started</div>
 </div></div></header>
 <main>
-<section class="hero"><p class="small" style="font-family:var(--font-mono);color:var(--accent2);font-weight:700;margin:0 0 8px">CS650 — WEEK 3 PARTICIPATION</p><h1>Chapter 3: Solving Problems by Searching</h1><p>This participation module follows the lecture deck, presenter notes, and Chapter 3 study pamphlet from beginning to end. On a phone, simply keep scrolling: read each lecture visual and explanation, open the study cards, and complete the knowledge checks as you reach them.</p><div class="notice"><strong>Required:</strong> Complete the entire page from top to bottom in order. Your official progress is based on knowledge-check questions answered. Study-card engagement contributes to the participation grade, while lecture viewing is retained as audit evidence. Each multiple-choice question has one submitted attempt only. You must sign in with the same school email listed on the instructor roster. Your required actions are recorded to the CS650 Supabase participation record.</div><p class="small">Source basis: Russell &amp; Norvig, <em>Artificial Intelligence: A Modern Approach</em>, 4th ed., Chapter 3; CS650 lecture deck and pamphlet prepared for Fall 2026.</p></section>
+<section class="hero"><p class="small" style="font-family:var(--font-mono);color:var(--accent2);font-weight:700;margin:0 0 8px">CS650 — WEEK 3 PARTICIPATION</p><h1>Chapter 3: Solving Problems by Searching</h1><p>This participation module follows the lecture deck, presenter notes, and Chapter 3 study pamphlet from beginning to end. On a phone, simply keep scrolling: read each lecture visual and explanation, open the study cards, and complete the knowledge checks as you reach them.</p><div class="notice"><strong>Required:</strong> Complete the entire page from top to bottom in order. Your official progress is based on knowledge-check questions answered. Study-card engagement contributes to the participation grade, while lecture viewing is retained as audit evidence. Each multiple-choice question has one submitted attempt only. You must sign in with your Monroe University Student ID. Your Student ID is matched to the instructor roster, and your required actions are recorded to the CS650 Supabase participation record.</div><p class="small">Source basis: Russell &amp; Norvig, <em>Artificial Intelligence: A Modern Approach</em>, 4th ed., Chapter 3; CS650 lecture deck and pamphlet prepared for Fall 2026.</p></section>
 <section class="authbox" id="authBox">
 <h2 style="margin-top:0">Student Login</h2>
-<p>Sign in with the same school email listed on the CS650 instructor roster. Your course, term, and section are resolved from the roster and cannot be changed from this page.</p>
-<div id="authFields"><div class="authgrid"><div><label>Full name</label><input id="auth-name" autocomplete="name" placeholder="First and last name"></div><div><label>School email</label><input id="auth-email" type="email" autocomplete="email" placeholder="you@monroeu.edu"></div><div><label>Password</label><input id="auth-password" type="password" autocomplete="current-password" placeholder="Password"></div></div><div class="authactions"><button class="primary" id="auth-signin">Sign in</button><button class="primary" id="auth-signup">Create account</button></div></div>
+<p>Sign in with your Monroe University Student ID. Your name, course, term, section, and school email are resolved from the instructor roster and cannot be changed from this page.</p>
+<div id="authFields"><div class="authgrid"><div><label>Student ID</label><input id="auth-student-id" inputmode="numeric" autocomplete="username" placeholder="Monroe University Student ID"></div><div><label>Password</label><input id="auth-password" type="password" autocomplete="current-password" placeholder="Password"></div><div><label>&nbsp;</label><div class="gate-note" style="margin-top:8px">First visit? Enter your Student ID, choose a password of at least 8 characters, then select <strong>Create account</strong>.</div></div></div><div class="authactions"><button class="primary" id="auth-signin">Sign in</button><button class="primary" id="auth-signup">Create account</button></div></div>
 <div class="authactions"><button class="primary" id="auth-signout" hidden>Sign out</button></div>
 <div id="auth-status" class="gate-note">Sign in before beginning. Work completed while signed out cannot be credited.</div>
 <div id="academic-identity" class="identity" hidden><span class="server-badge">Roster verified</span><div class="identity-grid" style="margin-top:8px"><div><span>Student</span><strong id="ai-student">—</strong></div><div><span>School email</span><strong id="ai-email">—</strong></div><div><span>Course</span><strong id="ai-course">—</strong></div><div><span>Term</span><strong id="ai-term">—</strong></div><div><span>Section</span><strong id="ai-section">—</strong></div><div><span>Student ID</span><strong id="ai-student-id">—</strong></div></div></div>
@@ -493,19 +493,56 @@ function lock(){ $('sectionPanel').classList.add('hidden');$('academic-identity'
 async function bootstrap(){
  const {data:{user}}=await client.auth.getUser();currentUser=user||null;$('auth-signout').hidden=!user;$('authFields').hidden=!!user;
  if(!user){lock();setStatus('Sign in before beginning. Work completed while signed out cannot be credited.');return;}
- setStatus('Signed in. Matching your email to the CS650 instructor roster…');
+ setStatus('Signed in. Matching your Student ID to the CS650 instructor roster…');
  try{
   const r=await api({action:'bootstrap'});
   const offering=(r.offerings||[]).find(o=>o.assignment?.slug===ASSIGNMENT_SLUG&&Number(o.assignment?.version)===ASSIGNMENT_VERSION);
-  if(!offering){lock();setStatus('Signed in, but this email is not on the CS650 roster for this participation assignment. Contact Professor Kassoh if this is unexpected.','err');return;}
+  if(!offering){lock();setStatus('Signed in, but this Student ID is not on the CS650 roster for this participation assignment. Contact Professor Kassoh if this is unexpected.','err');return;}
   currentOffering=offering;const enrollment=(r.enrollments||[]).find(e=>e.section_id===offering.section_id);showIdentity(r,enrollment,offering);
   let resumed=await api({action:'resume_session',offering_id:offering.id});
   if(!resumed.session){await api({action:'start_session',offering_id:offering.id,track:'business'});resumed=await api({action:'resume_session',offering_id:offering.id});}
   sessionId=resumed.session?.id||null;hydrate(resumed);setStatus('Roster verified. Your Chapter 3 participation is being recorded to Supabase.','ok');unlock();
  }catch(e){lock();setStatus(e.message||String(e),'err');console.error(e);}
 }
-async function signIn(){try{setStatus('Signing in…');const email=$('auth-email').value.trim().toLowerCase(),password=$('auth-password').value;const {error}=await client.auth.signInWithPassword({email,password});if(error)throw error;await bootstrap();}catch(e){setStatus(e.message||String(e),'err')}}
-async function signUp(){try{const name=$('auth-name').value.trim(),email=$('auth-email').value.trim().toLowerCase(),password=$('auth-password').value;if(!name)throw new Error('Enter your full name.');if(password.length<8)throw new Error('Use a password of at least 8 characters.');setStatus('Creating account…');const {data,error}=await client.auth.signUp({email,password,options:{data:{full_name:name},emailRedirectTo:location.href.split('#')[0]}});if(error)throw error;if(data.session)await bootstrap();else setStatus('Account created. Check your school email to confirm it, then return and sign in.','ok');}catch(e){setStatus(e.message||String(e),'err')}}
+async function studentAuth(action){
+  const studentId=$('auth-student-id').value.trim(),password=$('auth-password').value;
+  if(!studentId)throw new Error('Enter your Student ID.');
+  if(password.length<8)throw new Error('Password must be at least 8 characters.');
+  const {data,error}=await client.functions.invoke('student-auth-api',{body:{action,student_id:studentId,password}});
+  if(error)throw new Error(error.message||'Student account service error');
+  if(data?.error)throw new Error(data.error);
+  return data;
+}
+async function applyStudentSession(data){
+  const access_token=data?.session?.access_token,refresh_token=data?.session?.refresh_token;
+  if(!access_token||!refresh_token)throw new Error(data?.message||'Account is ready. Please sign in with your Student ID and password.');
+  const {error}=await client.auth.setSession({access_token,refresh_token});
+  if(error)throw error;
+  await bootstrap();
+}
+async function signIn(){
+  try{
+    setStatus('Signing in with Student ID…');
+    const data=await studentAuth('login');
+    await applyStudentSession(data);
+  }catch(e){setStatus(e.message||String(e),'err')}
+}
+
+let signUpBusy=false;
+async function signUp(){
+  const btn=$('auth-signup');
+  if(signUpBusy)return;
+  try{
+    signUpBusy=true;if(btn){btn.disabled=true;btn.textContent='Creating account…';}
+    setStatus('Checking the roster and creating your account…');
+    const data=await studentAuth('register');
+    await applyStudentSession(data);
+  }catch(e){
+    setStatus(e.message||String(e),'err');
+  }finally{
+    signUpBusy=false;if(btn){btn.disabled=false;btn.textContent='Create account';}
+  }
+}
 async function signOut(){await client.auth.signOut();lock();await bootstrap()}
 async function recordCard(key){
   if(!sessionId||openedKeys.has(key))return;
@@ -698,7 +735,7 @@ function receiptText(){
   const g=gradeBreakdown();
   return 'CS650 Chapter 3 Participation Grade Report\n'+
     'Student: '+(currentUser?.user_metadata?.full_name||$('ai-student')?.textContent||'—')+'\n'+
-    'Email: '+(currentUser?.email||'—')+'\n'+
+    'School Email: '+($('ai-email')?.textContent||'—')+'\n'+
     'Section: '+($('ai-section')?.textContent||'—')+'\n'+
     'Participation grade: '+g.grade.toFixed(2)+'/10\n'+
     'Question completion: '+g.completionPoints.toFixed(2)+'/7.00 ('+g.answered+'/'+g.totalQuestions+' answered)\n'+
@@ -741,7 +778,7 @@ function downloadPDF(){
   doc.setFontSize(15);doc.text('CS650 Week 3 Participation Grade Report',left,y);y+=10;
 
   line('Student',$('ai-student').textContent);
-  line('School Email',currentUser?.email||'');
+  line('School Email',$('ai-email')?.textContent||'');
   line('Course',$('ai-course').textContent);
   line('Term',$('ai-term').textContent);
   line('Section',$('ai-section').textContent);
