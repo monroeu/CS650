@@ -1,0 +1,1020 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CS650 Week 5 Participation — Chapter 5: Constraint Satisfaction Problems</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#F3EEDF;--stripe:#E7ECE3;--ink:#1E2A22;--muted:#5B6459;--line:#B9AF95;--bg:#F3EEDF;--panel:#FBF9F1;--accent:#8A4419;--accent2:#2F6F63;--ok:#117a4f;--warn:#a45b00;--font-display:'Zilla Slab',Georgia,serif;--font-body:'Source Sans 3',system-ui,sans-serif;--font-mono:'IBM Plex Mono','Courier New',monospace}
+*{box-sizing:border-box} body{margin:0;font-family:var(--font-body);background:repeating-linear-gradient(var(--paper),var(--paper) 26px,var(--stripe) 26px,var(--stripe) 52px);color:var(--ink);line-height:1.6;overflow-x:hidden}
+header{background:rgba(251,249,241,.96);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20;backdrop-filter:blur(6px)} .top{max-width:1180px;margin:auto;padding:12px 18px;display:flex;gap:14px;align-items:center;justify-content:space-between}
+.brand strong{display:block;font-size:18px} .brand span{font-size:13px;color:var(--muted)} .progressWrap{min-width:260px} .bar{height:8px;background:#e8eaf0;border-radius:999px;overflow:hidden} .bar>div{height:100%;width:0;background:var(--accent2)}
+main{max-width:1180px;margin:0 auto;padding:22px 18px 70px} .hero{background:rgba(251,249,241,.96);border:1px solid var(--line);padding:26px;margin-bottom:18px;box-shadow:3px 3px 0 var(--line)} .hero h1{font-family:var(--font-display);font-weight:600;margin:0 0 8px;font-size:clamp(32px,5vw,52px);line-height:1.08} .hero p{margin:8px 0;color:#3c4451}
+.notice{border-left:4px solid var(--accent);background:#fff8ee;padding:12px 14px;margin:16px 0} nav.sections{display:none!important}
+.panel{background:rgba(251,249,241,.97);border:1px solid var(--line);padding:20px;margin:0 0 16px;box-shadow:0 4px 14px rgba(30,42,34,.05)} .sectionHead{display:flex;justify-content:space-between;gap:15px;align-items:flex-start} .sectionHead h2{margin:0;font-size:26px} .sectionHead p{margin:4px 0;color:var(--muted)}
+.lesson{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(300px,.9fr);gap:22px;align-items:start} .visual img{width:100%;height:auto;border:1px solid #cbd0da;background:white;display:block} .caption{font-size:12px;color:var(--muted);margin-top:6px}
+.explain h3{margin-top:0;font-size:22px} .explain .notes{white-space:pre-line} .takeaway{border-left:4px solid var(--accent2);background:#eef9fb;padding:10px 12px;margin:14px 0} .teach{border-top:1px solid var(--line);margin-top:16px;padding-top:12px}
+.pager{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:18px} .pager button,.primary{border:1px solid #253048;background:#253048;color:#fff;padding:10px 15px;border-radius:3px;font-weight:700;cursor:pointer} .pager button:disabled{opacity:.35;cursor:not-allowed} .counter{font-size:14px;color:var(--muted)}
+.cardsGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px} .card{border:1px solid var(--line);background:#FBF9F1;padding:14px;min-height:110px;cursor:pointer} .card .term{font-weight:800} .card .answer{display:none;margin-top:8px;color:#384253} .card.open .answer{display:block} .card.open{border-left:4px solid var(--accent2);background:#eef4ed}
+.q{border-top:1px solid var(--line);padding:14px 0} .q:first-child{border-top:0} .opt{display:flex;gap:10px;padding:9px 8px;border:1px solid #e2e5eb;margin:7px 0;cursor:pointer;background:#fff} .opt input{width:auto} .feedback{margin-top:8px;font-weight:700} .good{color:var(--ok)} .bad{color:#a22}
+.receipt label{display:block;font-weight:700;margin:8px 0 4px} .receipt input{width:100%;max-width:430px;padding:10px;border:1px solid var(--line);font-size:16px} .summary{background:#f7f8fb;border:1px solid var(--line);padding:12px;margin:12px 0;white-space:pre-line}
+.small{font-size:13px;color:var(--muted)} .hidden{display:none!important}
+.authbox{background:rgba(251,249,241,.97);border:2px solid var(--accent2);padding:18px;margin:0 0 18px;box-shadow:3px 3px 0 #D9E8E3}.authgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.authbox input{width:100%;padding:10px;border:1px solid var(--line);font-size:16px}.authactions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.identity{margin-top:12px;padding:12px;background:#eef9fb;border-left:4px solid var(--accent2)}.identity-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.identity span{font-size:12px;color:var(--muted);display:block}.gate-note{font-size:13px;color:var(--muted);margin-top:8px}.status-ok{color:var(--ok);font-weight:700}.status-err{color:#a22;font-weight:700}.server-badge{display:inline-block;padding:3px 7px;border:1px solid #8ab7ae;background:#f4fbf8;font-size:11px;font-weight:700;border-radius:999px}.receipt button:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:780px){.lesson{grid-template-columns:1fr} .cardsGrid{grid-template-columns:1fr} .hero h1{font-size:25px} .progressWrap{min-width:140px} nav.sections{top:72px} .top{align-items:flex-start}}
+@media print{header,nav.sections,.pager,.primary{display:none!important} body{background:#fff} main{max-width:none} .panel{break-inside:avoid}}
+
+
+.illustration-note{
+  display:inline-block;
+  margin-top:.5rem;
+  padding:.35rem .65rem;
+  border:1px solid rgba(7,88,171,.18);
+  background:#eef6ff;
+  color:#0f3b78;
+  border-radius:999px;
+  font-size:.88rem;
+  font-weight:700;
+}
+.illustration-panel{
+  background:#fbfdff;
+  border:1px solid var(--line);
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:0 12px 26px rgba(16,24,40,.06);
+}
+.illustration-head{
+  padding:18px 18px 8px;
+  border-bottom:1px solid #edf2f7;
+}
+.illustration-head h4{
+  margin:0 0 .4rem;
+  font-size:1.15rem;
+  line-height:1.35;
+}
+.illustration-head p{
+  margin:0;
+  color:var(--muted);
+}
+.illustration-body{
+  padding:16px 18px 18px;
+  display:grid;
+  gap:16px;
+}
+.illus-grid{
+  display:grid;
+  gap:16px;
+  grid-template-columns:1.1fr .9fr;
+}
+.trace-box,
+.steps-box,
+.teacher-box,
+.homework-box{
+  border:1px solid #e5e7eb;
+  border-radius:14px;
+  padding:14px;
+  background:#fff;
+}
+.trace-box h5,
+.steps-box h5,
+.teacher-box h5,
+.homework-box h5{
+  margin:0 0 .6rem;
+  font-size:1rem;
+}
+.trace-diagram{
+  white-space:pre-wrap;
+  font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size:.92rem;
+  line-height:1.55;
+  margin:0;
+  color:#1f2937;
+}
+.step-list{
+  margin:0;
+  padding-left:1.15rem;
+}
+.step-list li{
+  margin:0 0 .7rem;
+}
+.step-list li:last-child{margin-bottom:0;}
+.teacher-box ul,.homework-box ul{
+  margin:.35rem 0 0 1.1rem;
+}
+.teacher-box li,.homework-box li{margin:.45rem 0;}
+@media(max-width:860px){
+  .illus-grid{grid-template-columns:1fr;}
+  .illustration-head,.illustration-body{padding-inline:14px;}
+}
+
+
+.opt input:disabled{cursor:not-allowed}
+.opt:has(input:disabled){cursor:default;opacity:.92}
+.q button:disabled{opacity:.6;cursor:not-allowed}
+
+
+.concept-visual{min-height:220px;padding:22px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(145deg,#f7fbf9,#eef5f2);display:flex;flex-direction:column;justify-content:center}.concept-visual .visual-kicker{font-family:var(--font-mono);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent2);font-weight:800;margin-bottom:10px}.concept-visual h4{font-size:1.25rem;margin:0 0 14px;color:var(--ink)}.concept-visual .visual-pills{display:flex;flex-wrap:wrap;gap:9px}.concept-visual .visual-pill{padding:8px 10px;border-radius:999px;background:white;border:1px solid var(--line);font-size:.9rem;font-weight:700;color:#3e554c}.concept-visual .visual-number{font-size:3rem;font-weight:900;color:rgba(47,111,99,.16);line-height:1;margin-bottom:4px}@media(max-width:620px){.concept-visual{min-height:180px;padding:18px}.concept-visual h4{font-size:1.12rem}}
+</style>
+<style id="cs650-mobile-first">
+html{-webkit-text-size-adjust:100%}
+body{overflow-x:hidden;font-size:16px}
+header .top{padding:10px 12px;gap:10px}
+.brand strong{font-size:17px}
+.brand span{font-size:12px}
+.progressWrap{min-width:0;flex:1;max-width:210px}
+main{width:100%;max-width:820px;padding:14px 12px 64px}
+.hero,.authbox,.panel{margin-bottom:14px}
+.hero{padding:18px 15px}
+.hero h1{font-size:clamp(1.75rem,8vw,2.35rem)}
+.hero p{font-size:1rem}
+.authbox{padding:15px}
+.authgrid{grid-template-columns:minmax(0,1fr)}
+.authbox input{min-height:48px;font-size:16px}
+.authactions .primary,.primary{min-height:46px;padding:11px 14px;touch-action:manipulation}
+nav.sections{display:none!important}
+.panel{padding:16px 14px}
+.sectionHead{display:block}
+.sectionHead h2{font-size:1.55rem}
+.sectionHead .counter{margin-top:6px}
+.lesson{
+  display:block;
+  border-top:1px solid var(--line);
+  padding:24px 0;
+}
+.lesson:first-of-type{border-top:0;padding-top:8px}
+.visual{margin-bottom:15px}
+.visual img{width:100%;height:auto;border:1px solid #cbd0da}
+.caption{font-size:12px}
+.explain h3{font-size:1.22rem;margin:0 0 10px}
+.explain .notes{white-space:pre-line;font-size:1rem}
+.takeaway,.teach{padding:11px 12px}
+.cardsGrid{grid-template-columns:minmax(0,1fr);gap:10px}
+.card{min-height:0;padding:15px}
+.card .term{font-size:1rem}
+.q{padding:20px 0}
+.q>strong{display:block;font-size:1rem;line-height:1.4;margin-bottom:10px}
+.opt{
+  width:100%;
+  min-height:50px;
+  align-items:center;
+  padding:11px 10px;
+  margin:8px 0;
+  overflow:hidden
+}
+.opt input[type="radio"]{
+  width:22px!important;
+  height:22px!important;
+  min-width:22px!important;
+  flex:0 0 22px;
+  margin:0;
+}
+.opt span{min-width:0;overflow-wrap:anywhere}
+.feedback{font-size:.95rem}
+.receipt{padding-top:20px}
+.identity-grid{grid-template-columns:minmax(0,1fr)}
+.pager{display:none!important}
+@media(min-width:620px){
+  main{padding:20px 18px 80px}
+  .hero,.authbox,.panel{padding:22px}
+  .authgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .authgrid>div:last-child{grid-column:1/-1}
+  .identity-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cardsGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(min-width:900px){
+  main{max-width:1050px}
+  .lesson{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,.9fr);gap:24px}
+  .cardsGrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+
+.section-block-wrap{
+  padding:24px 0 8px;
+  border-top:3px solid var(--accent2);
+  margin-top:28px;
+}
+.section-block-wrap:first-child{border-top:0;margin-top:0;padding-top:0}
+.section-block-wrap>.sectionHead{
+  margin-bottom:10px;
+  padding-bottom:12px;
+  border-bottom:1px solid var(--line);
+}
+.section-block-wrap>.sectionHead h2{
+  font-family:var(--font-display);
+  font-size:clamp(1.55rem,6vw,2rem);
+}
+.section-block{margin-top:24px}
+@media(max-width:780px){
+  main{padding-inline:10px}
+  .panel{padding:14px 12px}
+  .lesson{padding:22px 0}
+  .section-block-wrap{margin-top:22px;padding-top:20px}
+}
+
+
+.explain .notes{font-size:1rem;line-height:1.72}
+.explain .notes p{margin:0 0 1rem}
+.explain .notes p:last-child{margin-bottom:0}
+.explain .notes ul,.explain .notes ol{margin:.5rem 0 1rem 1.25rem;padding-left:.85rem}
+.explain .notes li{margin:.38rem 0;line-height:1.6}
+.explain .notes .lead{font-weight:600}
+.explain .notes .note-block{margin-bottom:1rem}
+
+
+
+.illustration-note{
+  display:inline-block;
+  margin-top:.5rem;
+  padding:.35rem .65rem;
+  border:1px solid rgba(7,88,171,.18);
+  background:#eef6ff;
+  color:#0f3b78;
+  border-radius:999px;
+  font-size:.88rem;
+  font-weight:700;
+}
+.illustration-panel{
+  background:#fbfdff;
+  border:1px solid var(--line);
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:0 12px 26px rgba(16,24,40,.06);
+}
+.illustration-head{
+  padding:18px 18px 8px;
+  border-bottom:1px solid #edf2f7;
+}
+.illustration-head h4{
+  margin:0 0 .4rem;
+  font-size:1.15rem;
+  line-height:1.35;
+}
+.illustration-head p{
+  margin:0;
+  color:var(--muted);
+}
+.illustration-body{
+  padding:16px 18px 18px;
+  display:grid;
+  gap:16px;
+}
+.illus-grid{
+  display:grid;
+  gap:16px;
+  grid-template-columns:1.1fr .9fr;
+}
+.trace-box,
+.steps-box,
+.teacher-box,
+.homework-box{
+  border:1px solid #e5e7eb;
+  border-radius:14px;
+  padding:14px;
+  background:#fff;
+}
+.trace-box h5,
+.steps-box h5,
+.teacher-box h5,
+.homework-box h5{
+  margin:0 0 .6rem;
+  font-size:1rem;
+}
+.trace-diagram{
+  white-space:pre-wrap;
+  font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size:.92rem;
+  line-height:1.55;
+  margin:0;
+  color:#1f2937;
+}
+.step-list{
+  margin:0;
+  padding-left:1.15rem;
+}
+.step-list li{
+  margin:0 0 .7rem;
+}
+.step-list li:last-child{margin-bottom:0;}
+.teacher-box ul,.homework-box ul{
+  margin:.35rem 0 0 1.1rem;
+}
+.teacher-box li,.homework-box li{margin:.45rem 0;}
+@media(max-width:860px){
+  .illus-grid{grid-template-columns:1fr;}
+  .illustration-head,.illustration-body{padding-inline:14px;}
+}
+
+
+.feedback.teaching-feedback{
+  margin-top:12px;
+  padding:12px 14px;
+  border-radius:10px;
+  line-height:1.55;
+  font-weight:500;
+}
+.feedback.teaching-feedback.good{
+  background:#eef9f3;
+  border:1px solid #b9dec9;
+  color:#155c39;
+}
+.feedback.teaching-feedback.bad{
+  background:#fff4f2;
+  border:1px solid #efc3bc;
+  color:#7c2d24;
+}
+.feedback .answer-label{
+  display:block;
+  margin-bottom:4px;
+  font-weight:800;
+}
+.feedback .why-label{
+  font-weight:800;
+}
+
+
+.studentProgressSummary{display:flex;gap:14px;justify-content:flex-end;align-items:center;margin-bottom:5px}
+.studentProgressSummary>div{display:flex;flex-direction:column;align-items:flex-end;line-height:1.05}
+.progressLabel{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700}
+.studentProgressSummary strong{font-family:var(--font-mono);font-size:15px;color:var(--ink)}
+@media(max-width:620px){
+  header{position:sticky;top:0}
+  .top{align-items:center}
+  .brand span{display:none}
+  .progressWrap{max-width:190px}
+  .studentProgressSummary{gap:9px}
+  .studentProgressSummary strong{font-size:14px}
+  .progressLabel{font-size:9px}
+  #progressText{font-size:11px;text-align:right}
+}
+
+
+.savedStatus{font-size:10px;color:var(--muted);text-align:right;margin-top:2px;min-height:14px}
+.resume-strip{position:sticky;top:72px;z-index:18;max-width:820px;margin:0 auto 10px;padding:8px 12px;background:#eef9fb;border:1px solid #9cc8c0;box-shadow:0 3px 10px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.resume-strip button{min-height:40px}
+.primary:focus-visible,.card:focus-visible,.opt:focus-within,input:focus-visible,button:focus-visible{outline:3px solid #2f6f63;outline-offset:2px}
+.feedback[role="status"]{border-radius:4px;padding:10px 12px}
+.concept-paragraph{margin:14px 0;line-height:1.65}
+.concept-lead{font-weight:800;color:var(--ink);letter-spacing:.01em}
+@media(max-width:620px){.concept-paragraph{margin:16px 0}.concept-lead{display:inline;font-size:1.02em}}
+@media(max-width:620px){.resume-strip{top:94px;margin-inline:10px}}
+
+
+.teaching-block{margin:0 0 1.15rem;padding:0 0 .1rem;border:0}
+.teaching-block h4{margin:0 0 .35rem;font-size:1.02rem;line-height:1.3;font-weight:800;color:var(--accent2);letter-spacing:.01em}
+.teaching-block p{margin:0;line-height:1.72;color:var(--ink)}
+.teaching-block+.teaching-block{padding-top:.15rem}
+.concept-preview{padding:10px 12px;border-left:3px solid var(--accent2);background:#f2f8f5}.concept-preview h4{margin-bottom:.4rem}.concept-preview p strong{color:var(--ink)}
+@media(max-width:620px){.teaching-block{margin-bottom:1.3rem}.teaching-block h4{font-size:1.06rem}.teaching-block p{font-size:1rem;line-height:1.75}}
+
+/* Formula blocks: keep important mathematics visually separate from explanatory prose. */
+.formula-block{
+  margin:16px 0 18px;
+  padding:14px 16px;
+  border:1px solid var(--line);
+  border-left:5px solid var(--accent2);
+  border-radius:8px;
+  background:#f5faf8;
+  text-align:center;
+}
+.formula-block .formula-label{
+  display:block;
+  margin-bottom:6px;
+  font-size:.78rem;
+  font-weight:800;
+  letter-spacing:.055em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+.formula-block .formula{
+  display:block;
+  font-family:var(--font-mono);
+  font-size:clamp(1.08rem,4.8vw,1.4rem);
+  font-weight:700;
+  line-height:1.45;
+  overflow-wrap:anywhere;
+}
+.formula-block .formula-note{
+  display:block;
+  margin-top:7px;
+  font-size:.9rem;
+  line-height:1.45;
+  color:var(--muted);
+}
+.formula-block.eval{background:#eef7f5;border-left-color:#2f6f63}.formula-block.eval .formula{color:#245c53}
+.formula-block.cost{background:#fff7ed;border-left-color:#a45b00}.formula-block.cost .formula{color:#8a4419}
+.formula-block.complexity{background:#f1f5ff;border-left-color:#405aa8}.formula-block.complexity .formula{color:#304989}
+.formula-block.condition{background:#f8f1fb;border-left-color:#76508f}.formula-block.condition .formula{color:#624177}
+.formula-block.definition{background:#f4f7ef;border-left-color:#56704f}.formula-block.definition .formula{color:#425b3e}
+@media(max-width:620px){.formula-block{padding:13px 12px;margin:15px 0}.formula-block .formula{font-size:1.08rem}}
+
+
+.concept-visual{min-height:220px;padding:22px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(145deg,#f7fbf9,#eef5f2);display:flex;flex-direction:column;justify-content:center}.concept-visual .visual-kicker{font-family:var(--font-mono);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent2);font-weight:800;margin-bottom:10px}.concept-visual h4{font-size:1.25rem;margin:0 0 14px;color:var(--ink)}.concept-visual .visual-pills{display:flex;flex-wrap:wrap;gap:9px}.concept-visual .visual-pill{padding:8px 10px;border-radius:999px;background:white;border:1px solid var(--line);font-size:.9rem;font-weight:700;color:#3e554c}.concept-visual .visual-number{font-size:3rem;font-weight:900;color:rgba(47,111,99,.16);line-height:1;margin-bottom:4px}@media(max-width:620px){.concept-visual{min-height:180px;padding:18px}.concept-visual h4{font-size:1.12rem}}
+</style>
+
+</head>
+<body><header><div class="top"><div class="brand"><strong>CS650 · Artificial Intelligence</strong><span>Week 5 Participation · Chapter 5: Constraint Satisfaction Problems</span></div><div class="progressWrap">
+  <div class="studentProgressSummary" aria-live="polite">
+    <div><span class="progressLabel">Participation grade</span><strong id="gradeText">0/10</strong></div>
+    <div><span class="progressLabel">Questions</span><strong id="questionText">0/30</strong></div>
+  </div>
+  <div class="bar"><div id="barFill"></div></div>
+  <div class="small" id="progressText">Question progress: 0%</div><div class="savedStatus" id="savedStatus" aria-live="polite">Not started</div>
+</div></div></header>
+<main>
+<section class="hero"><p class="small" style="font-family:var(--font-mono);color:var(--accent2);font-weight:700;margin:0 0 8px">CS650 — WEEK 5 PARTICIPATION</p><h1>Chapter 5: Constraint Satisfaction Problems</h1><p>This participation module covers the full Chapter 5 sequence from Russell & Norvig. On a phone, keep scrolling: study each concept visual and explanation, open the study cards, and complete the knowledge checks as you reach them.</p><div class="notice"><strong>Required:</strong> Complete the entire page from top to bottom in order. Your official progress is based on knowledge-check questions answered. Study-card engagement contributes to the participation grade, while lecture viewing is retained as audit evidence. Each multiple-choice question has one submitted attempt only. You must sign in with your Monroe University Student ID. Your Student ID is matched to the instructor roster, and your required actions are recorded to the CS650 Supabase participation record.</div><p class="small">Source basis: Russell &amp; Norvig, <em>Artificial Intelligence: A Modern Approach</em>, 4th ed., Chapter 5, “Constraint Satisfaction Problems.”</p></section>
+<section class="authbox" id="authBox">
+<h2 style="margin-top:0">Student Login</h2>
+<p>Sign in with your Monroe University Student ID. Your name, course, term, section, and school email are resolved from the instructor roster and cannot be changed from this page.</p>
+<div id="authFields"><div class="authgrid"><div><label>Student ID</label><input id="auth-student-id" inputmode="numeric" autocomplete="username" placeholder="Monroe University Student ID"></div><div><label>Password</label><input id="auth-password" type="password" autocomplete="current-password" placeholder="Password"></div><div><label>&nbsp;</label><div class="gate-note" style="margin-top:8px">First visit? Enter your Student ID, choose a password of at least 8 characters, then select <strong>Create account</strong>. <span style="white-space:nowrap;color:#61736b;font-size:.82em">Student ID Login v3</span></div></div></div><div class="authactions"><button class="primary" id="auth-signin">Sign in</button><button class="primary" id="auth-signup">Create account</button></div></div>
+<div class="authactions"><button class="primary" id="auth-signout" hidden>Sign out</button></div>
+<div id="auth-status" class="gate-note">Sign in before beginning. Work completed while signed out cannot be credited.</div>
+<div id="academic-identity" class="identity" hidden><span class="server-badge">Roster verified</span><div class="identity-grid" style="margin-top:8px"><div><span>Student</span><strong id="ai-student">—</strong></div><div><span>School email</span><strong id="ai-email">—</strong></div><div><span>Course</span><strong id="ai-course">—</strong></div><div><span>Term</span><strong id="ai-term">—</strong></div><div><span>Section</span><strong id="ai-section">—</strong></div><div><span>Student ID</span><strong id="ai-student-id">—</strong></div></div></div>
+</section>
+<div class="resume-strip hidden" id="resumeStrip"><span><strong>Resume where you left off?</strong><br><span class="small">Your last position on this device was saved automatically.</span></span><button class="primary" id="resumeBtn" type="button">Resume</button></div>
+<section class="panel hidden" id="sectionPanel"></section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+<script src="../assets/week-auto-activate.js" defer></script>
+<script>
+const SECTIONS=[{"id":"intro","label":"Start Here","range":[1,3],"subtitle":"Chapter overview, vocabulary, and learning goals"},{"id":"5.1","label":"5.1 Defining CSPs","range":[4,12],"subtitle":"Variables, domains, constraints, examples, and CSP variations"},{"id":"5.2","label":"5.2 Constraint Propagation","range":[13,21],"subtitle":"Node, arc, path, and k-consistency; AC-3; global constraints; Sudoku"},{"id":"5.3","label":"5.3 Backtracking Search","range":[22,28],"subtitle":"Backtracking, variable/value ordering, inference, backjumping, and learning"},{"id":"5.4","label":"5.4 Local Search for CSPs","range":[29,30],"subtitle":"Min-conflicts, plateaus, tabu search, weighting, and repair"},{"id":"5.5","label":"5.5 Structure of Problems","range":[31,35],"subtitle":"Independent subproblems, trees, cutsets, tree decomposition, and symmetry"},{"id":"review","label":"Review & Submit","range":[36,36],"subtitle":"Chapter synthesis, final knowledge check, and completion receipt"}];
+const SLIDES=[{"n":1,"title":"CS650 · ARTIFICIAL INTELLIGENCE · FALL 2026","notes":"Chapter 5 introduces constraint satisfaction problems, or CSPs. A CSP describes a problem in terms of variables that need values, domains that say which values are possible, and constraints that say which combinations are allowed. The power of the framework is that a solver can reason with those constraints before blindly trying every complete assignment. That lets it prune large parts of the search space and explain where inconsistency comes from.\n\nThis chapter develops three complementary ideas: propagate constraints to remove impossible values, search intelligently when propagation is not enough, and exploit the structure of the constraint graph whenever possible.","visual":["CSP = variables + domains + constraints","Propagate before guessing","Search only when necessary","Exploit problem structure"]},{"n":2,"title":"ROADMAP","notes":"The chapter follows a clear progression. Section 5.1 defines the CSP representation and shows map coloring, job-shop scheduling, global constraints, and constrained optimization. Section 5.2 asks what can be inferred before search by enforcing local consistency. Section 5.3 adds backtracking search and general-purpose heuristics such as MRV, the degree heuristic, and least-constraining value. Section 5.4 switches to local search over complete assignments. Section 5.5 shows that the graph structure itself can turn an apparently exponential problem into a much easier one.\n\nThe unifying question is always the same: how can the solver eliminate impossible choices as early as possible?","visual":["5.1 Represent the problem","5.2 Propagate constraints","5.3 Backtrack intelligently","5.4 Repair complete assignments","5.5 Exploit graph structure"]},{"n":3,"title":"LEARNING OBJECTIVES","notes":"By the end of the chapter, you should be able to formulate a problem as a CSP using variables, domains, and constraints; distinguish consistent, complete, partial, and solution assignments; explain node, arc, path, and k-consistency; trace AC-3; explain how backtracking is improved by MRV, degree, least-constraining value, forward checking, and MAC; describe conflict-directed backjumping and constraint learning; trace min-conflicts; and explain how tree structure, cutset conditioning, tree decomposition, and symmetry affect complexity.\n\nA strong answer in this chapter does more than name an algorithm. It explains what information the algorithm uses, what it eliminates, and why that reduces search.","visual":["Formulate CSPs","Trace propagation","Improve backtracking","Apply local search","Use structural decomposition"]},{"n":4,"title":"SECTION 5.1 · DEFINING CONSTRAINT SATISFACTION PROBLEMS","notes":"A constraint satisfaction problem represents a state with assignments of values to variables and represents the requirements for a solution with constraints. Unlike atomic search, the solver can look inside the representation: it knows which variables are involved in which constraints. That structure gives the solver information it can use to rule out many assignments without enumerating them one by one.\n\nThe first task is therefore representation: identify the variables, specify each variable's domain, and state the constraints precisely.","visual":["Variables","Domains","Constraints","Assignments","Solutions"]},{"n":5,"title":"5.1 · THE FORMAL CSP MODEL","notes":"A CSP has three components. X is the set of variables. D is the set of domains, one domain for each variable. C is the set of constraints that specify which combinations of values are allowed. A constraint has a scope—the variables it talks about—and a relation that defines the allowed value combinations.\n\nThis is more than notation. Once the problem is expressed in this form, general CSP algorithms can use the same machinery across map coloring, scheduling, Sudoku, cryptarithmetic, and many other domains.","visual":["X: variables","D: domains","C: constraints","Constraint = scope + relation"]},{"n":6,"title":"5.1 · ASSIGNMENTS AND SOLUTIONS","notes":"An assignment gives values to one or more variables. It is consistent, or legal, if it violates no constraint. It is complete when every variable has a value. A CSP solution is therefore a complete and consistent assignment. A partial assignment leaves some variables unassigned, and a partial solution is a partial assignment that remains consistent.\n\nThis distinction matters because most CSP search algorithms work with partial assignments. The moment a partial assignment violates a constraint, every extension of that assignment can be discarded.","visual":["Consistent = no violation","Complete = all variables assigned","Solution = consistent + complete","Partial solution = consistent so far"]},{"n":7,"title":"5.1.1 · MAP COLORING","notes":"In the Australia map-coloring example, the variables are the regions WA, NT, Q, NSW, V, SA, and T. Each variable has the domain {red, green, blue}. Constraints require neighboring regions to have different colors. The same problem can be drawn as a constraint graph: variables become nodes, and a binary constraint between two variables becomes an edge.\n\nThe graph exposes structure. Once SA is assigned a color, that color can immediately be removed from the domains of its five neighbors. Constraint reasoning therefore prunes many assignments before they are explicitly tried.","visual":["Variable = region","Domain = {red, green, blue}","Edge = neighboring regions must differ","Graph structure enables pruning"]},{"n":8,"title":"5.1 · WHY CSP FORMULATION HELPS","notes":"Atomic state-space search usually asks whether a complete state is a goal and then generates successors. CSP reasoning can be more selective. If a partial assignment already violates a constraint, the solver can stop extending that branch immediately. It can also identify which variables caused the conflict and focus attention on them.\n\nThis is why the representation matters: two problems with the same number of possible complete assignments can have very different practical difficulty if one exposes useful constraint structure and the other does not.","visual":["Detect failure early","Prune whole families of assignments","Identify the variables causing conflict","Use structure, not just enumeration"]},{"n":9,"title":"5.1.2 · JOB-SHOP SCHEDULING","notes":"Scheduling can be modeled as a CSP by making each task a variable whose value is its start time. Precedence constraints require one task to finish before another begins. Disjunctive constraints represent resources that cannot be used by two tasks at the same time. Domains can also enforce a deadline by restricting every start time to an allowed interval.\n\nThe example shows how arithmetic and logical conditions still fit the CSP framework: they are all constraints on allowable combinations of variable values.","visual":["Task → variable","Start time → value","Precedence constraints","Shared-resource disjunctions","Deadline → bounded domain"]},{"n":10,"title":"5.1.3 · DOMAIN VARIATIONS","notes":"CSP domains can be discrete and finite, discrete and infinite, or continuous. Map coloring and bounded scheduling have finite domains. Integer scheduling without a deadline can create infinite discrete domains. Continuous-domain CSPs appear in operations research, including precise scheduling and linear programming.\n\nThe domain type matters because it determines which solving methods are practical. Finite domains can often be represented explicitly, whereas large, infinite, or continuous domains require more compact mathematical descriptions.","visual":["Finite discrete","Infinite discrete","Continuous","Representation affects the solver"]},{"n":11,"title":"5.1.3 · CONSTRAINT TYPES AND GLOBAL CONSTRAINTS","notes":"A unary constraint restricts one variable. A binary constraint relates two variables. Higher-order constraints involve three or more variables. A global constraint can involve an arbitrary number of variables; Alldiff is a common example requiring all participating variables to have different values.\n\nGlobal constraints are not merely shorthand. A specialized algorithm for a global constraint can infer more efficiently than a large collection of primitive binary constraints. Cryptarithmetic and Sudoku both benefit from this idea.","visual":["Unary","Binary","Higher-order","Global","Alldiff"]},{"n":12,"title":"5.1 · PREFERENCES AND CONSTRAINED OPTIMIZATION","notes":"Some real problems distinguish hard constraints from preferences. A university schedule might absolutely forbid a professor from teaching two classes at the same time, while merely preferring a morning slot over an afternoon slot. Preferences can be represented as costs, turning the task into a constrained optimization problem, or COP.\n\nThe important distinction is that violating a hard constraint makes an assignment invalid, whereas violating a preference can still yield a valid solution—it is simply less desirable according to the objective function.","visual":["Hard constraint: must satisfy","Preference: affects quality","COP = CSP + objective"]},{"n":13,"title":"SECTION 5.2 · CONSTRAINT PROPAGATION","notes":"Constraint propagation is inference that uses constraints to shrink domains. Removing an impossible value from one variable may make values in neighboring variables impossible, causing further reductions. Propagation can happen before search, during search, or both. In easy problems it can solve the entire CSP without any guessing.\n\nThe central concept is local consistency: make small parts of the constraint graph internally consistent so that impossible values disappear throughout the problem.","visual":["Infer domain reductions","Propagate consequences","Reduce later branching","Sometimes solve without search"]},{"n":14,"title":"5.2.1 · NODE CONSISTENCY","notes":"A variable is node-consistent when every value remaining in its domain satisfies all unary constraints on that variable. If South Australia is not allowed to be green, node consistency simply removes green from SA's domain. A graph is node-consistent when every variable is node-consistent.\n\nNode consistency is the simplest form of propagation. It cleans each variable's domain using constraints that involve only that variable before more complex relationships are considered.","visual":["Unary constraints","Remove locally illegal values","Simplest consistency level"]},{"n":15,"title":"5.2.2 · ARC CONSISTENCY","notes":"A variable Xi is arc-consistent with respect to Xj when every value in Xi's current domain has at least one supporting value in Xj's domain that satisfies the binary constraint between them. If a value has no support, that value can be deleted. A graph is arc-consistent when this holds in both directions for every relevant pair.\n\nArc consistency is stronger than node consistency because it reasons across binary relationships. But it still looks only one arc away, so some global contradictions can remain invisible.","visual":["Every value needs support","Unsupported values are removed","Reason across binary constraints","Still a local test"]},{"n":16,"title":"5.2.2 · AC-3","notes":"AC-3 is the standard algorithm presented for enforcing arc consistency. It begins with a queue of arcs. When an arc (Xi, Xj) is processed, REVISE removes values from Xi that have no supporting value in Xj. If Xi's domain shrinks, arcs from Xi's other neighbors must be reconsidered because those neighbors may have lost support.\n\nAC-3 stops in one of three useful states: every arc is consistent, some domain becomes empty and the CSP is impossible under the current assumptions, or all domains become singletons and the problem is solved.","visual":["Queue arcs","REVISE Xi using Xj","If Xi shrinks, revisit its neighbors","Empty domain = failure"]},{"n":17,"title":"5.2.2 · AC-3 COMPLEXITY","notes":"Let n be the number of variables, d the maximum domain size, and c the number of binary constraints or arcs under consideration. An arc can be reconsidered only as values are deleted, and checking support for one arc may compare pairs of domain values. The resulting worst-case bound given in the chapter is cubic in d.\n\nThe practical lesson is not just the formula: propagation spends computation now to reduce branching later. Whether that trade-off pays off depends on the problem and the strength of the consistency method.","visual":["More propagation work now","Potentially much less search later","Worst-case AC-3: O(c d³)"]},{"n":18,"title":"5.2.3 · PATH CONSISTENCY","notes":"Arc consistency can miss contradictions that appear only when three variables are considered together. Path consistency strengthens the binary relationships by asking whether every consistent assignment to Xi and Xj can be extended through a third variable Xm.\n\nIn two-color Australia, each individual neighboring pair can satisfy its inequality constraint, so arc consistency sees no problem. But WA, NT, and SA form a triangle. Path consistency reveals that two colors cannot satisfy all three pairwise inequalities at once.","visual":["Arc consistency: pairwise support","Path consistency: extend through a third variable","Detects contradictions hidden from AC"]},{"n":19,"title":"5.2.4 · K-CONSISTENCY","notes":"K-consistency generalizes the same idea. A CSP is k-consistent when any consistent assignment to k−1 variables can be extended to any kth variable. Node consistency corresponds to 1-consistency, arc consistency to 2-consistency, and for binary CSPs path consistency to 3-consistency. Strong k-consistency requires all lower levels as well.\n\nStronger consistency can reduce or even eliminate search, but establishing high levels of consistency is itself expensive. The chapter emphasizes that there is no free lunch: general CSP solving remains NP-complete.","visual":["1-consistency = node","2-consistency = arc","3-consistency = path for binary CSPs","Stronger inference costs more"]},{"n":20,"title":"5.2.5 · GLOBAL CONSTRAINTS, RESOURCES, AND BOUNDS","notes":"Global constraints allow specialized inference. With Alldiff, if m variables collectively have fewer than m possible distinct values, the constraint cannot be satisfied. Resource constraints such as Atmost can detect overload by looking at domain bounds. When domains are very large, bounds propagation tracks intervals instead of explicitly storing every integer value.\n\nThis is an important design lesson: the way a constraint is represented can determine how much useful inference the solver can perform.","visual":["Alldiff reasoning","Resource/Atmost constraints","Bounds propagation","Representation changes inference power"]},{"n":21,"title":"5.2.6 · SUDOKU AS A CSP","notes":"Sudoku is naturally modeled with 81 variables, one per square. Empty squares have domain {1,…,9}; prefilled squares have singleton domains. Rows, columns, and 3×3 boxes each impose an Alldiff constraint. Propagation removes values already used by peers and can force a square to a single remaining value.\n\nEasy Sudoku instances may collapse under arc consistency alone. Harder instances require stronger inference or search. The broader lesson is that the same generic CSP machinery applies without needing a special-purpose Sudoku search algorithm.","visual":["81 variables","Domains 1–9","27 Alldiff units","Propagation can force values"]},{"n":22,"title":"SECTION 5.3 · BACKTRACKING SEARCH FOR CSPs","notes":"Propagation does not always reduce every domain to one value. When choices remain, the solver must search. Backtracking search works with partial assignments and extends them one variable at a time. If a choice makes the partial assignment inconsistent, the solver retracts that choice and tries another value.\n\nBecause CSP assignments are commutative, the solver does not need to branch on every possible ordering of variable assignments. It chooses one unassigned variable at each level and branches only over that variable's values.","visual":["Partial assignments","Choose one variable","Try values","Undo on failure","Exploit commutativity"]},{"n":23,"title":"5.3 · BACKTRACKING AND COMMUTATIVITY","notes":"A naive formulation that allows any unassigned variable/value pair as the next action creates many duplicate paths because assigning X then Y is equivalent to assigning Y then X. CSPs are commutative: the order of independent assignments does not change the resulting assignment.\n\nBacktracking therefore selects a single unassigned variable at each depth and explores only its domain values. This removes a factorial amount of duplicated ordering work while preserving all complete assignments.","visual":["Naive tree repeats assignment orders","CSP assignments commute","One variable per level","Avoid n! duplicate orderings"]},{"n":24,"title":"5.3.1 · MRV, DEGREE, AND LEAST-CONSTRAINING VALUE","notes":"Variable ordering asks which variable should be assigned next. Minimum remaining values, or MRV, chooses the variable with the fewest legal values—the fail-first idea. The degree heuristic breaks ties by choosing the variable constraining the largest number of other unassigned variables.\n\nValue ordering asks which value should be tried first. Least-constraining value chooses the value that rules out the fewest options for neighboring variables. The logic is deliberate: fail early when choosing a variable, but preserve flexibility when choosing its value.","visual":["MRV: fewest legal values","Degree: most constraints on others","LCV: rules out the fewest neighbor values","Fail-first + preserve flexibility"]},{"n":25,"title":"5.3.2 · FORWARD CHECKING","notes":"Forward checking performs limited inference after each assignment. When X receives a value, the solver removes from every unassigned neighbor Y any values inconsistent with X. If a neighbor loses its last value, failure is detected immediately and the search backtracks.\n\nForward checking is useful because it exposes consequences of the current choice before the solver commits to additional variables. It also maintains exactly the domain-size information that MRV needs.","visual":["Assign X","Prune inconsistent values from neighbors","Empty neighbor domain = backtrack","Pairs naturally with MRV"]},{"n":26,"title":"5.3.2 · MAINTAINING ARC CONSISTENCY (MAC)","notes":"Forward checking only looks from the newly assigned variable to its immediate neighbors. MAC goes further. After assigning Xi, it launches arc consistency starting with arcs from unassigned neighbors back toward Xi. Any domain reduction can propagate recursively through the graph.\n\nMAC is therefore strictly stronger than forward checking: it performs the same initial pruning and continues propagating the consequences. The trade-off is additional inference work at each search step.","visual":["Forward checking: one-step look-ahead","MAC: recursive arc propagation","Stronger pruning","More work per decision"]},{"n":27,"title":"5.3.3 · INTELLIGENT BACKTRACKING","notes":"Chronological backtracking always returns to the most recent decision, even when that variable had nothing to do with the contradiction. Backjumping uses a conflict set to jump directly to a recent assignment that contributed to the failure. Conflict-directed backjumping carries this idea further by combining conflict information across deeper failures.\n\nThe teaching point is causal: do not merely ask where the search failed; ask which earlier assignments made failure unavoidable.","visual":["Chronological: go back one step","Conflict set: assignments responsible","Backjumping: skip irrelevant decisions","Conflict-directed: propagate reasons backward"]},{"n":28,"title":"5.3.4 · CONSTRAINT LEARNING","notes":"Backjumping helps the solver escape a contradiction efficiently, but the solver may encounter the same bad combination later. Constraint learning records a compact explanation of the conflict—a no-good—and adds it as a new constraint or cached forbidden combination.\n\nThe learned no-good prevents the search from rediscovering the same contradiction in another part of the tree. This is one of the most important ideas in modern constraint solving: learn from failure rather than merely retreat from it.","visual":["Conflict occurs","Extract a no-good","Record it","Avoid repeating the same failure"]},{"n":29,"title":"SECTION 5.4 · LOCAL SEARCH AND MIN-CONFLICTS","notes":"Local search uses a complete assignment from the beginning, even if that assignment violates constraints. The min-conflicts heuristic repeatedly chooses a conflicted variable and changes it to the value that minimizes the number of conflicts.\n\nThis is a very different search space from backtracking. Backtracking builds a consistent partial assignment. Min-conflicts repairs an inconsistent complete assignment. For problems such as n-queens, this simple repair strategy can be remarkably effective.","visual":["Start complete, possibly inconsistent","Pick a conflicted variable","Choose a minimum-conflict value","Repeat until no conflicts remain"]},{"n":30,"title":"5.4 · PLATEAUS, TABU SEARCH, WEIGHTING, AND REPAIR","notes":"Min-conflicts landscapes often contain plateaus where many assignments have the same score. Sideways moves can help traverse a plateau. Tabu search keeps a short memory of recent states to avoid immediately cycling back. Constraint weighting raises the importance of repeatedly violated constraints so the search concentrates on difficult parts of the problem.\n\nLocal search is also attractive when a previously valid solution needs repair after the problem changes. Starting from the current assignment can preserve most of the existing schedule while fixing only what has become infeasible.","visual":["Plateau moves","Tabu memory","Constraint weighting","Online repair after change"]},{"n":31,"title":"SECTION 5.5 · THE STRUCTURE OF PROBLEMS","notes":"The constraint graph is not just a picture; its structure can determine computational difficulty. If the graph splits into connected components, each component is an independent subproblem. Solving the components separately can transform an exponential problem into a collection of much smaller problems.\n\nEven when a graph is connected, tree-like structure can be exploited. The rest of the section shows two broad tactics: remove a small set of variables to make the graph a tree, or group variables into clusters whose relationships form a tree.","visual":["Connected components","Independent subproblems","Tree structure","Remove nodes or cluster nodes"]},{"n":32,"title":"5.5 · TREE-STRUCTURED CSPs AND DIRECTIONAL ARC CONSISTENCY","notes":"A tree-structured constraint graph has only one path between any pair of variables. Choose a root and a topological ordering in which parents come before children. Then enforce directional arc consistency from the leaves back toward the root. Once those supports are guaranteed, assign values from the root outward without backtracking.\n\nThe result is striking: a tree-structured CSP can be solved in time linear in the number of variables, apart from the domain comparison factor.","visual":["Root the tree","Topologically order variables","Make arcs consistent backward","Assign forward without backtracking"]},{"n":33,"title":"5.5.1 · CUTSET CONDITIONING","notes":"A general graph may become a tree if a small set of variables is removed. That set is a cycle cutset. Cutset conditioning tries assignments to the cutset variables; for each consistent cutset assignment, it prunes incompatible values from the remaining domains and solves the resulting tree-structured CSP efficiently.\n\nThis method is powerful when the graph is nearly a tree. Its cost is exponential in the cutset size c rather than in the full number of variables n.","visual":["Choose a cycle cutset S","Try assignments to S","Remove incompatible values","Solve remaining tree"]},{"n":34,"title":"5.5.2 · TREE DECOMPOSITION AND TREE WIDTH","notes":"Tree decomposition groups original variables into clusters and arranges those clusters as a tree. The decomposition must preserve every variable, every original constraint, and consistency of shared variables along the path between clusters. The solver can then apply tree-CSP reasoning to the cluster tree.\n\nThe key quantity is tree width. Smaller clusters mean smaller tuple domains and more efficient solving. Bounded tree width gives polynomial-time solvability for the corresponding class of CSPs, although finding the best decomposition is itself difficult.","visual":["Cluster variables into tree nodes","Preserve constraints","Shared variables stay consistent","Efficiency governed by tree width"]},{"n":35,"title":"5.5.3 · VALUE SYMMETRY","notes":"Sometimes the graph is not the only source of structure; the values themselves may be interchangeable. In map coloring, renaming red, green, and blue produces equivalent solutions. With d colors, one solution can correspond to d! permutations of the color names.\n\nA symmetry-breaking constraint keeps one representative from each family of equivalent solutions. This can reduce search dramatically because the solver no longer wastes time rediscovering the same structure under different value labels.","visual":["Equivalent value permutations","d! symmetric solutions","Add a symmetry-breaking constraint","Search one representative"]},{"n":36,"title":"CHAPTER 5 · SYNTHESIS","notes":"Chapter 5 presents CSP solving as a layered strategy. First, formulate the problem so the variables, domains, and constraints expose useful structure. Second, propagate constraints to eliminate impossible values before search. Third, when choices remain, use backtracking with strong ordering and inference heuristics or use local repair methods such as min-conflicts. Finally, exploit graph structure, decomposition, and symmetry whenever they reduce the effective problem size.\n\nThe recurring principle is economical reasoning: spend computation where it prevents much larger amounts of unnecessary search.","visual":["Represent well","Propagate early","Search intelligently","Learn from failure","Exploit structure"]}];
+const CARDS={"intro":[["Constraint satisfaction problem (CSP)","A problem defined by variables, domains, and constraints on allowable value combinations."],["Constraint propagation","Inference that removes values made impossible by constraints."],["Backtracking search","Depth-first search over partial assignments that retracts choices when they fail."]],"5.1":[["Variable","A quantity in the CSP that must be assigned a value."],["Domain","The set of allowable values for one variable."],["Constraint","A rule specifying which value combinations are allowed."],["Consistent assignment","An assignment that violates no constraints."],["Complete assignment","An assignment giving every variable a value."],["Global constraint","A constraint involving an arbitrary number of variables, such as Alldiff."],["Constrained optimization problem","A CSP with preferences or an objective used to compare valid solutions."]],"5.2":[["Node consistency","Every value satisfies the variable's unary constraints."],["Arc consistency","Every value of one variable has a supporting value in the connected variable."],["AC-3","Queue-based algorithm that repeatedly revises arcs until stable or failure occurs."],["Path consistency","Pairwise assignments can be extended consistently through a third variable."],["k-consistency","Any consistent assignment to k−1 variables can be extended to any kth variable."],["Bounds propagation","Inference using lower and upper bounds instead of enumerating huge domains."],["Alldiff","Global constraint requiring all participating variables to have different values."]],"5.3":[["MRV","Choose the unassigned variable with the fewest legal values."],["Degree heuristic","Prefer the variable constraining the most unassigned neighbors."],["Least-constraining value","Try the value that removes the fewest options from neighbors."],["Forward checking","After assignment, prune inconsistent values from unassigned neighbors."],["MAC","Maintain arc consistency after each assignment, allowing recursive propagation."],["Conflict set","Earlier assignments implicated in making a variable fail."],["No-good","A learned forbidden combination of assignments that caused a contradiction."]],"5.4":[["Min-conflicts","Repair a complete assignment by changing conflicted variables to lower-conflict values."],["Tabu search","Avoid short cycles by temporarily forbidding recently visited states or moves."],["Constraint weighting","Increase weights on repeatedly violated constraints to focus search effort."]],"5.5":[["Connected component","Independent portion of a constraint graph that can be solved separately."],["Directional arc consistency","Arc consistency enforced according to a variable ordering."],["Cycle cutset","Variables whose removal makes the remaining constraint graph a tree."],["Tree decomposition","Transform a graph into a tree of variable clusters."],["Tree width","One less than the size of the largest cluster in the best tree decomposition."],["Value symmetry","Different value labels produce equivalent solutions."],["Symmetry breaking","Add constraints to keep only one representative from symmetric solutions."]],"review":[["Chapter strategy","Represent → propagate → search/repair → exploit structure."],["Fail-first","Choose difficult variables early so contradictions are exposed quickly."],["Learn from failure","Conflict-directed methods and no-goods prevent wasted repeated work."]]};
+const MC={"intro":[["What makes a constraint satisfaction problem different from an atomic state-space problem?",["A CSP exposes variables, domains, and constraints that algorithms can reason about","A CSP never requires search","A CSP can contain only Boolean variables","A CSP always has exactly one solution"],"a"],["What is the main purpose of constraint propagation?",["To choose a random complete assignment","To remove values that cannot participate in a consistent solution","To convert every CSP into a shortest-path problem","To increase each variable's domain before search"],"b"],["Which sequence best captures the chapter's overall strategy?",["Search first, then define constraints","Represent, propagate, search or repair, exploit structure","Optimize, randomize, then remove variables","Enumerate every complete assignment before checking constraints"],"b"]],"5.1":[["Which triple defines a CSP formally?",["States, actions, goals","Variables, domains, constraints","Nodes, edges, path costs","Inputs, outputs, rewards"],"b"],["Which statement defines a CSP solution?",["Any partial assignment with at least one legal value","A complete assignment that violates no constraints","Any assignment produced by AC-3","The first assignment generated by backtracking"],"b"],["In the Australia map-coloring CSP, what does an edge in the constraint graph represent?",["Two regions that must use the same color","Two variables that participate in a binary constraint","A path chosen by the search algorithm","A variable with a singleton domain"],"b"],["Which example is a global constraint?",["SA ≠ WA","SA ≠ green","Alldiff(A1,…,A9)","X + 1 ≤ Y for one pair of variables"],"c"],["How does a preference constraint differ from a hard constraint?",["A preference can affect solution quality without making a solution invalid","A preference must always be satisfied before any hard constraint","A preference applies only to Boolean domains","A preference cannot be represented numerically"],"a"]],"5.2":[["What does node consistency remove?",["Values violating unary constraints","Binary constraints from the graph","Variables with more than one legal value","All values not chosen by MRV"],"a"],["Xi is arc-consistent with Xj when what is true?",["Xi and Xj have identical domains","Every value of Xi has at least one supporting value in Xj","Xi has a smaller domain than Xj","Every value of Xj is equal to some value of Xi"],"b"],["What causes AC-3 to add neighboring arcs back to its queue?",["A goal state is found","A domain is revised and becomes smaller","A variable is selected by MRV","A local-search plateau is reached"],"b"],["What does an empty domain during propagation indicate?",["The current CSP or partial assignment is inconsistent","The variable is already solved","The constraint graph is a tree","The solver should choose the least-constraining value"],"a"],["Why can path consistency detect failures that arc consistency misses?",["It reasons about extension through a third variable","It ignores binary constraints","It converts continuous domains to discrete ones","It always searches complete assignments"],"a"],["For a binary CSP, which correspondence is correct?",["1-consistency = path; 2-consistency = node; 3-consistency = arc","1-consistency = node; 2-consistency = arc; 3-consistency = path","1-consistency = arc; 2-consistency = path; 3-consistency = node","All three terms mean the same thing"],"b"]],"5.3":[["Why does CSP backtracking assign one variable at each level rather than branching on every variable/value pair?",["Because assignments are commutative and different assignment orders would duplicate work","Because only one variable may legally have a domain","Because constraints disappear after the first assignment","Because backtracking requires a complete assignment at every node"],"a"],["What does the MRV heuristic select?",["The variable with the most legal values","The unassigned variable with the fewest legal values","The value with the smallest numeric label","The variable farthest from the root"],"b"],["What is the role of the degree heuristic?",["Break MRV ties by preferring the variable constraining more unassigned neighbors","Choose the value with the lowest conflict weight","Estimate path cost to a goal","Limit the depth of backtracking"],"a"],["What does least-constraining value try to preserve?",["The maximum number of choices for neighboring variables","The shortest path from the root","The smallest possible domain for the current variable","The most recently assigned variable"],"a"],["How is MAC stronger than forward checking?",["MAC recursively propagates arc-consistency consequences beyond immediate neighbors","MAC never deletes domain values","MAC uses complete assignments instead of partial assignments","MAC replaces variable ordering with random selection"],"a"],["What is the purpose of constraint learning?",["Record no-goods so the solver avoids rediscovering the same contradiction","Increase domain sizes after failure","Force chronological backtracking","Convert every constraint to unary form"],"a"]],"5.4":[["How does min-conflicts differ from backtracking search?",["It starts with a complete assignment and repairs conflicts","It never assigns values to variables","It requires the constraint graph to be a tree","It uses only unary constraints"],"a"],["What is a plateau in local CSP search?",["A region of assignments with the same evaluation score","A variable with an empty domain","A tree decomposition with one cluster","A proof that the CSP is unsatisfiable"],"a"],["Why can local search be attractive for repairing an existing schedule after conditions change?",["It can start from the current assignment and make relatively small changes","It always guarantees an optimal solution","It removes the need for constraints","It requires every variable to become unassigned first"],"a"]],"5.5":[["Why are connected components useful in a constraint graph?",["They identify independent subproblems that can be solved separately","They guarantee every domain has size one","They eliminate all binary constraints","They convert local search into breadth-first search"],"a"],["What is the key advantage of a tree-structured CSP?",["After directional arc consistency, it can be solved without backtracking in O(nd²) time","It always has only one solution","It has no constraints","Its domains must be Boolean"],"a"],["What is a cycle cutset?",["A set of variables whose removal makes the remaining graph a tree","The set of all leaf variables","A collection of violated constraints in local search","A list of values removed by AC-3"],"a"],["What does tree width measure in this chapter?",["How wide the original drawing appears on screen","The size of the largest domain","One less than the largest cluster size in a tree decomposition","The number of solutions in a CSP"],"c"]],"review":[["Which pairing correctly matches a heuristic with its intent?",["MRV: fail early by choosing the most constrained variable","LCV: eliminate as many neighbor values as possible","Degree: choose the variable with the fewest constraints","Forward checking: ignore consequences until later"],"a"],["Which method explicitly learns from contradictions by recording forbidden combinations?",["Node consistency","Constraint learning","Topological sorting","Min-conflicts"],"b"],["What is the central theme connecting propagation, heuristic backtracking, and structural decomposition?",["Spend reasoning effort to avoid much larger amounts of unnecessary search","Always prefer complete assignments to partial ones","Replace constraints with path costs","Use the same fixed variable order for every CSP"],"a"]]};
+const MC_EXPLANATIONS={};
+
+const SUPABASE_URL='https://irnrjzeejalbbqdrbzmj.supabase.co';
+const SUPABASE_KEY='sb_publishable_aj2vpjfJrSMvjTxcKuC0pQ_pf7JbDo2';
+const ASSIGNMENT_SLUG='chapter-05-constraint-satisfaction-problems';
+const ASSIGNMENT_VERSION=1;
+const client=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+const navKey='cs650_ch3_nav_v2';
+let state=JSON.parse(localStorage.getItem(navKey)||'{"section":"intro","page":0}');
+let currentUser=null,currentOffering=null,currentSection=null,sessionId=null,completion=null;
+const openedKeys=new Set();
+const attempted=new Map();
+const qualifiedViews=new Set();
+const viewTimers=new Map();
+const scrollKey='cs650_ch5_scroll_v1';
+let lastSavedAt=null;
+let scrollSaveTimer=null;
+let apiBusy=false;
+const $=id=>document.getElementById(id);
+function setStatus(msg,kind=''){const el=$('auth-status');if(!el)return;el.textContent=msg;el.className='gate-note '+(kind==='ok'?'status-ok':kind==='err'?'status-err':'');}
+function put(id,v){const el=$(id);if(el)el.textContent=(v&&String(v).trim())?String(v):'—'}
+function saveStatusText(){
+  const el=$('savedStatus');if(!el)return;
+  if(!lastSavedAt){el.textContent='Progress saves after each recorded activity';return;}
+  el.textContent='Saved '+lastSavedAt.toLocaleTimeString([], {hour:'numeric',minute:'2-digit',second:'2-digit'});
+}
+function markSaved(){lastSavedAt=new Date();saveStatusText();}
+function saveScrollPosition(){
+  if(!currentUser)return;
+  localStorage.setItem(scrollKey+':'+currentUser.id,JSON.stringify({y:Math.max(0,window.scrollY||0),at:Date.now()}));
+}
+function offerResumePosition(){
+  if(!currentUser)return;
+  const raw=localStorage.getItem(scrollKey+':'+currentUser.id);if(!raw)return;
+  try{const v=JSON.parse(raw);if(Number(v.y)>650){const strip=$('resumeStrip');if(strip){strip.classList.remove('hidden');$('resumeBtn').onclick=()=>{window.scrollTo({top:Number(v.y),behavior:'smooth'});strip.classList.add('hidden')}}}}catch(_){}
+}
+window.addEventListener('scroll',()=>{clearTimeout(scrollSaveTimer);scrollSaveTimer=setTimeout(saveScrollPosition,400)},{passive:true});
+function saveNav(){localStorage.setItem(navKey,JSON.stringify({section:state.section,page:state.page}));}
+async function api(body){const {data,error}=await client.functions.invoke('participation-api',{body});if(error)throw new Error(error.message||'Participation API error');if(data?.error)throw new Error(data.error);return data;}
+const ILLUSTRATIONS={};
+
+function sectionToken(sec){return sec.replace('.','')}
+function studyKey(sec,i){return 'CS5-F-'+sectionToken(sec)+'-'+String(i+1).padStart(2,'0')}
+function questionKey(sec,i){return 'CS5-MC-'+sectionToken(sec)+'-'+String(i+1).padStart(2,'0')}
+function slideKey(n){return 'CS5-SL'+String(n).padStart(3,'0')}
+function secSlides(sec){const [a,b]=sec.range;return SLIDES.filter(s=>s.n>=a&&s.n<=b)}
+function sectionIllustrations(secId){return ILLUSTRATIONS[secId]||[]}
+function illustrationKey(secId,i){return 'CS5-ILL-'+sectionToken(secId)+'-'+String(i+1).padStart(2,'0')}
+function stripNote(t){return String(t||'').split('\n').filter(Boolean).join('\n').trim()}
+function takeaway(note){let x=String(note||'').split('\n').join(' ').split(/(?<=[.!?])\s+/).filter(Boolean);return x.slice(0,2).join(' ')}
+function escHtml(v){
+  return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+const TEACHING_LABELS={
+  intro:['Big idea','What this chapter will teach','Why it matters'],
+  concept:['Core concept','How it works','Why it matters'],
+  process:['Core idea','Process','Why it matters'],
+  compare:['Core idea','Compare the approaches','Teaching takeaway'],
+  example:['Core idea','Worked example','What to notice'],
+  algorithm:['Core idea','How the algorithm works','Properties and trade-offs'],
+  heuristic:['Core idea','How the heuristic guides search','Why it matters']
+};
+
+function teachingMode(sl){
+  const t=String(sl?.title||'').toLowerCase();
+  if(sl?.n<=3)return 'intro';
+  if(/four phases|process|execution|formulat/.test(t))return 'process';
+  if(/vs\.|comparing|comparison/.test(t))return 'compare';
+  if(/walkthrough|running example|example problems|real-world|standardized/.test(t))return 'example';
+  if(/ac-3|backtrack|forward checking|maintaining arc|mac|backjump|constraint learning|min-conflicts|tree-structured|cutset|tree decomposition/.test(t))return 'algorithm';
+  if(/mrv|degree|least-constraining|consistency|propagation|symmetry|global constraint/.test(t))return 'heuristic';
+  return 'concept';
+}
+
+function cleanTeachingText(text){
+  return String(text||'')
+    .replace(/\[(?:POINT|PAUSE|ASK)[^\]]*\]/gi,' ')
+    .replace(/\s+/g,' ')
+    .trim();
+}
+
+function splitTeachingSentences(note){
+  return cleanTeachingText(note)
+    .split(/(?<=[.!?])\s+/)
+    .map(x=>x.trim())
+    .filter(Boolean);
+}
+
+function groupTeachingSentences(sl,note){
+  const a=splitTeachingSentences(note);
+  if(!a.length)return [];
+  const mode=teachingMode(sl);
+
+  // Keep the narrative intact: 2–4 coherent blocks, never one label per sentence.
+  if(a.length<=3)return [{label:TEACHING_LABELS[mode][0],sentences:a}];
+
+  let cuts=[];
+  if(a.length<=6) cuts=[2];
+  else if(a.length<=10) cuts=[2, Math.ceil(a.length*0.65)];
+  else cuts=[2, Math.ceil(a.length*0.5), Math.ceil(a.length*0.78)];
+
+  const chunks=[]; let prev=0;
+  for(const c of cuts){ if(c>prev&&c<a.length){chunks.push(a.slice(prev,c));prev=c;} }
+  chunks.push(a.slice(prev));
+
+  const labels=TEACHING_LABELS[mode];
+  return chunks.map((sentences,i)=>({label:labels[Math.min(i,labels.length-1)],sentences}));
+}
+
+function labelForChunk(sl,chunk,index){
+  const n=Number(sl?.n||0);
+  const maps={
+    5:['The CSP model','What each component means','Why the representation matters'],
+    6:['Assignment vocabulary','What counts as a solution','Why partial assignments matter'],
+    9:['Scheduling as a CSP','Precedence and shared resources','What to notice'],
+    15:['Arc consistency','Support between domains','What arc consistency cannot see'],
+    16:['AC-3 core idea','How REVISE propagates','Stopping conditions'],
+    19:['Generalizing consistency','The hierarchy','The cost of stronger inference'],
+    24:['Choosing the next variable','Choosing the next value','Why the two heuristics point in opposite directions'],
+    27:['Why chronological backtracking wastes work','Conflict sets and backjumping','Reason about the cause of failure'],
+    28:['Learning from contradiction','No-goods','Why learning saves later work'],
+    29:['Complete-state local search','How min-conflicts works','Why it can be effective'],
+    31:['Graph structure matters','Independent subproblems','From general graphs toward trees'],
+    34:['Tree decomposition','Tree width','Time-memory trade-off']
+  };
+  return (maps[n]||[])[index]||null;
+}
+
+const FIRST_MENTION_PREVIEWS={"1":[["Constraint satisfaction problem (CSP)","a problem represented by variables, their possible values, and constraints on allowable combinations"],["Constraint propagation","inference that removes values that cannot participate in a consistent solution"],["Backtracking search","systematic search over partial assignments when inference alone is not enough"]],"2":[["Node consistency","remove values violating unary constraints"],["Arc consistency","require support for each value across every binary constraint"],["AC-3","a queue-based algorithm for enforcing arc consistency"],["MRV","choose the variable with the fewest legal values"],["Min-conflicts","repair a complete assignment by reducing conflicts"],["Tree decomposition","cluster variables so the resulting cluster graph is a tree"]],"3":[["No-good","a learned forbidden combination that explains a contradiction"],["Cycle cutset","variables whose removal makes a constraint graph acyclic"],["Tree width","a measure of the largest cluster needed in the best tree decomposition"]]};
+
+function conceptPreviewHtml(sl){
+  const items=FIRST_MENTION_PREVIEWS[Number(sl?.n)]||[];
+  if(!items.length)return '';
+  const text=items.map(([term,meaning])=>'<strong>'+escHtml(term)+':</strong> '+escHtml(meaning)+'.').join(' ');
+  return '<section class="teaching-block concept-preview"><h4>Concept preview</h4><p>'+text+'</p></section>';
+}
+
+function mergeTeachingBlocks(blocks){
+  const merged=[];
+  for(const b of blocks){
+    const prev=merged[merged.length-1];
+    if(prev && prev.label===b.label){
+      prev.sentences.push(...b.sentences);
+    }else{
+      merged.push({label:b.label,sentences:[...b.sentences]});
+    }
+  }
+  return merged;
+}
+
+
+const FORMULA_BLOCKS={"5":[{"kind":"definition","label":"CSP definition","formula":"CSP = (X, D, C)","note":"X = variables · D = domains · C = constraints"}],"7":[{"kind":"definition","label":"Australia domains","formula":"Dᵢ = {red, green, blue}","note":"Each region receives one color from the same three-value domain."}],"9":[{"kind":"condition","label":"Precedence constraint","formula":"T₁ + d₁ ≤ T₂","note":"Task T₁ must finish before task T₂ begins."},{"kind":"condition","label":"Disjunctive resource constraint","formula":"(AxleF + 10 ≤ AxleB)  OR  (AxleB + 10 ≤ AxleF)","note":"The shared tool prevents the two axle tasks from overlapping."}],"17":[{"kind":"complexity","label":"AC-3 worst-case time","formula":"O(c d³)","note":"c = binary constraints/arcs considered · d = maximum domain size"}],"19":[{"kind":"definition","label":"Strong consistency payoff","formula":"Strong n-consistency ⇒ solve in O(n²d)","note":"Achieving that level of consistency can itself require exponential time and space."}],"20":[{"kind":"condition","label":"Bounds example","formula":"D₁ = [35,165]   ·   D₂ = [255,385]","note":"Derived when F₁ + F₂ = 420 with capacities 165 and 385."}],"23":[{"kind":"complexity","label":"Duplicate-order search","formula":"naive leaves = n! · dⁿ","note":"Allowing all assignment orders repeats equivalent states."},{"kind":"complexity","label":"Backtracking after commutativity","formula":"leaves = dⁿ","note":"One variable per level removes the n! ordering factor."}],"27":[{"kind":"definition","label":"Conflict-set update","formula":"conf(Xᵢ) ← conf(Xᵢ) ∪ conf(Xⱼ) − {Xᵢ}","note":"Conflict-directed backjumping carries the reasons for failure backward."}],"32":[{"kind":"complexity","label":"Tree-structured CSP","formula":"Time = O(n d²)","note":"After directional arc consistency, values can be assigned without backtracking."}],"33":[{"kind":"complexity","label":"Cutset conditioning","formula":"O(dᶜ · (n−c) d²)","note":"c = cycle-cutset size; the exponential factor depends on c, not all n variables."}],"34":[{"kind":"complexity","label":"Bounded tree width","formula":"O(n d^(w+1))","note":"w = tree width. Bounded w gives polynomial-time CSP solving."}],"35":[{"kind":"definition","label":"Value symmetry","formula":"d! equivalent color permutations","note":"Symmetry-breaking constraints keep one representative instead of exploring all permutations."}]};
+
+function formulaBlocksHtml(sl){
+  const items=FORMULA_BLOCKS[Number(sl?.n)]||[];
+  return items.map(x=>
+    '<div class="formula-block '+escHtml(x.kind||'definition')+'">'+
+      '<span class="formula-label">'+escHtml(x.label||'Formula')+'</span>'+
+      '<span class="formula">'+escHtml(x.formula||'')+'</span>'+
+      (x.note?'<span class="formula-note">'+escHtml(x.note)+'</span>':'')+
+    '</div>'
+  ).join('');
+}
+
+function formatNotes(sl,note){
+  const groups=groupTeachingSentences(sl,note);
+  if(!groups.length)return conceptPreviewHtml(sl);
+
+  const labeled=groups.map((g,i)=>({
+    label:labelForChunk(sl,g.sentences,i) || g.label,
+    sentences:g.sentences
+  }));
+
+  // If two adjacent chunks serve the same teaching purpose, keep them together.
+  // Repeating a heading such as “Properties and trade-offs” fragments the lesson
+  // without signaling a real conceptual change.
+  const merged=mergeTeachingBlocks(labeled);
+
+  const lesson=merged.map(g=>{
+    const body=escHtml(g.sentences.join(' '));
+    return '<section class="teaching-block"><h4>'+escHtml(g.label)+'</h4><p>'+body+'</p></section>';
+  }).join('');
+
+  return conceptPreviewHtml(sl)+lesson+formulaBlocksHtml(sl);
+}
+
+function totals(){const illTotal=Object.values(ILLUSTRATIONS).reduce((a,x)=>a+x.length,0);return {slideTotal:SLIDES.length+illTotal,cardTotal:Object.values(CARDS).reduce((a,x)=>a+x.length,0),qTotal:Object.values(MC).reduce((a,x)=>a+x.length,0)}}
+function hydrate(data){
+  openedKeys.clear();for(const k of data.card_keys||[])openedKeys.add(k);
+  attempted.clear();for(const r of data.knowledge_responses||[])attempted.set(r.question_key,r);
+  qualifiedViews.clear();for(const v of data.view_activity||[])if(v?.activity_key)qualifiedViews.add(v.activity_key);
+  completion=data.completion||completion;
+  if(data.session||data.completion)markSaved();
+  updateProgress();
+}
+function showIdentity(r,enrollment,offering){const s=enrollment?.section||{};currentSection=s;put('ai-student',r.user?.full_name);put('ai-email',r.user?.email);put('ai-course',[s.course?.code,s.course?.title].filter(Boolean).join(' — '));put('ai-term',[s.term?.name,s.term?.code].filter(Boolean).join(' · '));put('ai-section',[s.course?.code&&s.section_code?s.course.code+'-'+s.section_code:s.section_code,s.title].filter(Boolean).join(' — '));put('ai-student-id',r.user?.institutional_id||'Not listed');$('academic-identity').hidden=false;}
+function unlock(){ $('sectionPanel').classList.remove('hidden');render();setTimeout(offerResumePosition,150); }
+function lock(){ $('sectionPanel').classList.add('hidden');$('academic-identity').hidden=true;$('resumeStrip')?.classList.add('hidden');sessionId=null;currentOffering=null;completion=null;openedKeys.clear();attempted.clear();qualifiedViews.clear();lastSavedAt=null;updateProgress();saveStatusText(); }
+async function bootstrap(){
+ const {data:{user}}=await client.auth.getUser();currentUser=user||null;$('auth-signout').hidden=!user;$('authFields').hidden=!!user;
+ if(!user){lock();setStatus('Sign in before beginning. Work completed while signed out cannot be credited.');return;}
+ setStatus('Signed in. Matching your Student ID to the CS650 instructor roster…');
+ try{
+  const r=await api({action:'bootstrap'});
+  const offering=(r.offerings||[]).find(o=>o.assignment?.slug===ASSIGNMENT_SLUG&&Number(o.assignment?.version)===ASSIGNMENT_VERSION);
+  if(!offering){lock();setStatus('Signed in, but this Student ID is not on the CS650 roster for this participation assignment. Contact Professor Kassoh if this is unexpected.','err');return;}
+  currentOffering=offering;const enrollment=(r.enrollments||[]).find(e=>e.section_id===offering.section_id);showIdentity(r,enrollment,offering);
+  let resumed=await api({action:'resume_session',offering_id:offering.id});
+  if(!resumed.session){await api({action:'start_session',offering_id:offering.id,track:'business'});resumed=await api({action:'resume_session',offering_id:offering.id});}
+  sessionId=resumed.session?.id||null;hydrate(resumed);setStatus('Roster verified. Your Chapter 5 participation is being recorded to Supabase.','ok');unlock();
+ }catch(e){lock();setStatus(e.message||String(e),'err');console.error(e);}
+}
+async function studentAuth(action){
+  const studentId=$('auth-student-id').value.trim(),password=$('auth-password').value;
+  if(!studentId)throw new Error('Enter your Student ID.');
+  if(password.length<8)throw new Error('Password must be at least 8 characters.');
+  const response=await fetch(`${SUPABASE_URL}/functions/v1/student-auth-api`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`},
+    body:JSON.stringify({action,student_id:studentId,password})
+  });
+  let data=null;
+  try{data=await response.json()}catch(_){ }
+  if(!response.ok)throw new Error(data?.error||`Student account service error (${response.status})`);
+  if(data?.error)throw new Error(data.error);
+  return data;
+}
+async function applyStudentSession(data){
+  const access_token=data?.session?.access_token,refresh_token=data?.session?.refresh_token;
+  if(!access_token||!refresh_token)throw new Error(data?.message||'Account is ready. Please sign in with your Student ID and password.');
+  const {error}=await client.auth.setSession({access_token,refresh_token});
+  if(error)throw error;
+  await bootstrap();
+}
+async function signIn(){
+  try{
+    setStatus('Signing in with Student ID…');
+    const data=await studentAuth('login');
+    await applyStudentSession(data);
+  }catch(e){setStatus(e.message||String(e),'err')}
+}
+
+let signUpBusy=false;
+async function signUp(){
+  const btn=$('auth-signup');
+  if(signUpBusy)return;
+  try{
+    signUpBusy=true;if(btn){btn.disabled=true;btn.textContent='Creating account…';}
+    setStatus('Checking the roster and creating your account…');
+    const data=await studentAuth('register');
+    await applyStudentSession(data);
+  }catch(e){
+    setStatus(e.message||String(e),'err');
+  }finally{
+    signUpBusy=false;if(btn){btn.disabled=false;btn.textContent='Create account';}
+  }
+}
+async function signOut(){await client.auth.signOut();lock();await bootstrap()}
+async function recordCard(key){
+  if(!sessionId||openedKeys.has(key))return;
+  try{
+    const r=await api({action:'card_opened',session_id:sessionId,card_key:key});
+    openedKeys.add(key);completion=r.completion||completion;markSaved();updateProgress();
+  }catch(e){
+    setStatus('This study-card opening was not recorded. Check your connection and open the card again.','err');
+  }
+}
+async function recordQualifiedView(key,ratio){
+  if(!sessionId||qualifiedViews.has(key))return;
+  const type=String(key).startsWith('CS5-ILL-')?'illustration':'lecture_slide';
+  try{
+    const r=await api({action:'record_view',session_id:sessionId,activity_key:key,activity_type:type,dwell_seconds:2,visibility_ratio:ratio});
+    if(r.qualified){qualifiedViews.add(key);completion=r.completion||completion;markSaved();updateProgress();}
+  }catch(e){setStatus('A lecture view could not be recorded. Your question answers are unaffected.','err');}
+}
+let slideObserver=null;
+function observeSlides(){
+  if(slideObserver)slideObserver.disconnect();
+  for(const t of viewTimers.values())clearTimeout(t);viewTimers.clear();
+  slideObserver=new IntersectionObserver(entries=>{
+    for(const entry of entries){
+      const el=entry.target,key=el.dataset.slideKey;if(!key||qualifiedViews.has(key))continue;
+      if(entry.isIntersecting&&entry.intersectionRatio>=0.5){
+        if(!viewTimers.has(key)){
+          const ratio=entry.intersectionRatio;
+          viewTimers.set(key,setTimeout(()=>{viewTimers.delete(key);recordQualifiedView(key,ratio)},2000));
+        }
+      }else if(viewTimers.has(key)){
+        clearTimeout(viewTimers.get(key));viewTimers.delete(key);
+      }
+    }
+  },{threshold:[0,0.5,0.75,1]});
+  document.querySelectorAll('[data-slide-key]').forEach(el=>slideObserver.observe(el));
+}
+
+const TEACHING_FEEDBACK={"intro":[{"why":"CSPs expose internal structure: variables, domains, and constraints. Algorithms can use that structure to infer impossibility before enumerating complete states.","others":"The other options falsely imply CSPs never search, restrict domains to Boolean values, or guarantee uniqueness.","remember":"CSP advantage = structured representation that supports inference."},{"why":"Constraint propagation repeatedly removes values that cannot be supported by the constraints, reducing later branching and sometimes solving the CSP outright.","others":"Random assignment is local search, not propagation; propagation does not enlarge domains or turn the task into shortest-path search.","remember":"Propagation shrinks domains before or during search."},{"why":"The correct choice matches the Chapter 5 definition or algorithmic behavior described in the lesson. Focus on what information the method uses and what it eliminates.","others":"The other options either describe a different CSP technique or contradict the formal definition used in Chapter 5.","remember":"Represent, propagate, search or repair, exploit structure"}],"5.1":[{"why":"A CSP is defined by X, D, and C: variables, a domain for each variable, and constraints on allowable combinations.","others":"States/actions/goals describe classical search; nodes/edges/path costs describe graphs; inputs/outputs/rewards are not the CSP formalism.","remember":"CSP = X + D + C."},{"why":"A solution must be both complete and consistent: every variable has a value and no constraint is violated.","others":"Partial assignments may be useful during search but are not complete solutions; AC-3 may stop before all domains are singleton.","remember":"Solution = complete + consistent."},{"why":"The correct choice matches the Chapter 5 definition or algorithmic behavior described in the lesson. Focus on what information the method uses and what it eliminates.","others":"The other options either describe a different CSP technique or contradict the formal definition used in Chapter 5.","remember":"Two variables that participate in a binary constraint"},{"why":"The correct choice matches the Chapter 5 definition or algorithmic behavior described in the lesson. Focus on what information the method uses and what it eliminates.","others":"The other options either describe a different CSP technique or contradict the formal definition used in Chapter 5.","remember":"Alldiff(A1,…,A9)"},{"why":"The correct choice matches the Chapter 5 definition or algorithmic behavior described in the lesson. Focus on what information the method uses and what it eliminates.","others":"The other options either describe a different CSP technique or contradict the formal definition used in Chapter 5.","remember":"A preference can affect solution quality without making a solution invalid"}],"5.2":[{"why":"The correct choice matches the Chapter 5 definition or algorithmic behavior described in the lesson. Focus on what information the method uses and what it eliminates.","others":"The other options either describe a different CSP technique or contradict the formal definition used in Chapter 5.","remember":"Values violating unary constraints"},{"why":"Arc consistency is about support. Every value in Xi must have at least one value in Xj that satisfies their binary constraint.","others":"Equal domains are unnecessary; domain size ordering is irrelevant; the supporting value need not be equal.","remember":"No support ⇒ delete the value."},{"why":"If REVISE shrinks Xi, neighbors of Xi may now lose support, so their arcs must be reconsidered.","others":"Goal detection, MRV selection, and local-search plateaus are outside AC-3's queue-update rule.","remember":"Domain change propagates outward."},{"why":"The correct choice matches the Chapter 5 definition or algorithmic behavior described in the lesson. Focus on what information the method uses and what it eliminates.","others":"The other options either describe a different CSP technique or contradict the formal definition used in Chapter 5.","remember":"The current CSP or partial assignment is inconsistent"},{"why":"Path consistency reasons about triples: a consistent pair must be extendable through a third variable. That extra context can reveal contradictions invisible to pairwise arc tests.","others":"It does not ignore binary constraints, discretize domains, or require complete assignments.","remember":"Path consistency sees one variable farther than arc consistency."},{"why":"The correct choice matches the Chapter 5 definition or algorithmic behavior described in the lesson. Focus on what information the method uses and what it eliminates.","others":"The other options either describe a different CSP technique or contradict the formal definition used in Chapter 5.","remember":"1-consistency = node; 2-consistency = arc; 3-consistency = path"}],"5.3":[{"why":"CSP assignments commute: assigning X then Y yields the same partial assignment as Y then X. Branching over assignment order creates duplicate search paths.","others":"The other options invent restrictions that CSPs do not impose.","remember":"One variable per level removes factorial ordering duplication."},{"why":"MRV is the fail-first heuristic. It chooses the variable with the fewest legal values so a contradiction, if present, is exposed early.","others":"Most-values does the opposite; value labels and tree distance are unrelated.","remember":"MRV = most constrained variable."},{"why":"The correct choice matches the Chapter 5 definition or algorithmic behavior described in the lesson. Focus on what information the method uses and what it eliminates.","others":"The other options either describe a different CSP technique or contradict the formal definition used in Chapter 5.","remember":"Break MRV ties by preferring the variable constraining more unassigned neighbors"},{"why":"Least-constraining value preserves flexibility by ruling out as few values as possible in neighboring variables.","others":"It is not trying to minimize the current domain, path length, or recency.","remember":"Variable choice fails early; value choice leaves options open."},{"why":"MAC starts with the same immediate pruning as forward checking and then recursively propagates arc-consistency consequences when domains shrink.","others":"It absolutely can delete values; it still uses partial assignments; it does not require random ordering.","remember":"MAC = forward checking plus continued propagation."},{"why":"Constraint learning records a no-good or equivalent learned constraint so the same contradictory combination is not explored again.","others":"It does not enlarge domains or require chronological backtracking.","remember":"Learn from failure, do not merely retreat from it."}],"5.4":[{"why":"Min-conflicts starts with every variable assigned, then repairs the assignment by changing conflicted variables to values that reduce conflicts.","others":"That is the opposite state representation from backtracking, which builds partial assignments.","remember":"Min-conflicts = repair a complete assignment."},{"why":"The correct choice matches the Chapter 5 definition or algorithmic behavior described in the lesson. Focus on what information the method uses and what it eliminates.","others":"The other options either describe a different CSP technique or contradict the formal definition used in Chapter 5.","remember":"A region of assignments with the same evaluation score"},{"why":"The correct choice matches the Chapter 5 definition or algorithmic behavior described in the lesson. Focus on what information the method uses and what it eliminates.","others":"The other options either describe a different CSP technique or contradict the formal definition used in Chapter 5.","remember":"It can start from the current assignment and make relatively small changes"}],"5.5":[{"why":"The correct choice matches the Chapter 5 definition or algorithmic behavior described in the lesson. Focus on what information the method uses and what it eliminates.","others":"The other options either describe a different CSP technique or contradict the formal definition used in Chapter 5.","remember":"They identify independent subproblems that can be solved separately"},{"why":"For a tree-structured binary CSP, directional arc consistency followed by forward assignment avoids backtracking and runs in O(nd²).","others":"Tree structure does not imply uniqueness, absence of constraints, or Boolean domains.","remember":"Trees turn CSP solving into a linear pass over variables, apart from domain comparisons."},{"why":"A cycle cutset is chosen so that removing those variables breaks cycles and leaves a tree. The solver enumerates cutset assignments and solves the remaining tree efficiently.","others":"Leaves, violated constraints, and AC-3 deletions are different concepts.","remember":"Cut the cycles, then use the tree solver."},{"why":"The correct choice matches the Chapter 5 definition or algorithmic behavior described in the lesson. Focus on what information the method uses and what it eliminates.","others":"The other options either describe a different CSP technique or contradict the formal definition used in Chapter 5.","remember":"One less than the largest cluster size in a tree decomposition"}],"review":[{"why":"The correct choice matches the Chapter 5 definition or algorithmic behavior described in the lesson. Focus on what information the method uses and what it eliminates.","others":"The other options either describe a different CSP technique or contradict the formal definition used in Chapter 5.","remember":"MRV: fail early by choosing the most constrained variable"},{"why":"The correct choice matches the Chapter 5 definition or algorithmic behavior described in the lesson. Focus on what information the method uses and what it eliminates.","others":"The other options either describe a different CSP technique or contradict the formal definition used in Chapter 5.","remember":"Constraint learning"},{"why":"All three methods trade relatively focused reasoning for large reductions in blind search: propagation removes unsupported values, heuristics expose failure or preserve flexibility, and decomposition shrinks the effective problem.","others":"The alternatives contradict Chapter 5's emphasis on structured reasoning and adaptive choices.","remember":"Reason early so you search less later."}]};
+
+function teachingFeedback(sec,qi,response){
+  const q=(MC[sec]||[])[qi];if(!q||!response)return '';
+  const lesson=(TEACHING_FEEDBACK[sec]||[])[qi]||{};
+  const correctLetter=String(response.correct_answer||'').toUpperCase();
+  const correctIndex='ABCD'.indexOf(correctLetter);
+  const correctText=correctIndex>=0?(q[1]||[])[correctIndex]:'';
+  const selectedLetter=String(response.selected_answer||'').toUpperCase();
+  const selectedIndex='ABCD'.indexOf(selectedLetter);
+  const selectedText=selectedIndex>=0?(q[1]||[])[selectedIndex]:'';
+  const heading=response.is_correct
+    ? 'Correct — '+correctLetter+(correctText?'. '+correctText:'')
+    : 'Incorrect — you chose '+selectedLetter+(selectedText?'. '+selectedText:'')+'. The correct answer is '+correctLetter+(correctText?'. '+correctText:'');
+  const why=lesson.why||response.explanation||'Review the matching Chapter 5 concept.';
+  const others=lesson.others||'Compare the alternatives against the formal definition used in Chapter 5.';
+  const remember=lesson.remember||'';
+  return '<span class="answer-label">'+escHtml(heading)+'</span>'+
+    '<span class="why-label">Teaching explanation:</span> '+escHtml(why)+'<br><br>'+
+    '<span class="why-label">Why the other choices do not fit:</span> '+escHtml(others)+
+    (remember?'<br><br><span class="why-label">Remember:</span> '+escHtml(remember):'');
+}
+
+function renderIllustrations(sec){
+  const items=sectionIllustrations(sec.id);
+  if(!items.length)return '';
+  const blocks=items.map((it,ii)=>{
+    const steps=(it.steps||[]).map(x=>'<li>'+escHtml(x)+'</li>').join('');
+    const teacher=(it.teacher||[]).map(x=>'<li>'+escHtml(x)+'</li>').join('');
+    const homework=(it.homework||[]).map(x=>'<li>'+escHtml(x)+'</li>').join('');
+    return '<article class="lesson illustration-panel" data-slide-key="'+illustrationKey(sec.id,ii)+'">'+
+      '<div class="illustration-head">'+
+        '<div class="caption">Illustrative teaching slide</div>'+
+        '<h4>'+escHtml(it.title)+'</h4>'+
+        '<p>'+escHtml(it.summary||'')+'</p>'+
+        '<span class="illustration-note">Practice it here → Now repeat this in Colab or your notebook → Apply it to homework</span>'+
+      '</div>'+
+      '<div class="illustration-body">'+
+        '<div class="illus-grid">'+
+          '<div class="trace-box"><h5>Step-by-step illustration</h5><pre class="trace-diagram">'+escHtml(it.trace||'')+'</pre></div>'+
+          '<div class="steps-box"><h5>How to read the algorithm trace</h5><ol class="step-list">'+steps+'</ol></div>'+
+        '</div>'+
+        '<div class="teacher-box"><h5>Teaching moment</h5><ul>'+teacher+'</ul></div>'+
+        '<div class="homework-box"><h5>Apply it to homework or exams</h5><ul>'+homework+'</ul></div>'+
+      '</div></article>';
+  }).join('');
+  return '<section class="section-block"><h3>Illustrative teaching slides</h3><p>These guided slides slow the algorithm down so you can follow each decision, each frontier update, and each heuristic judgment one step at a time.</p>'+blocks+'</section>';
+}
+
+function lectureVisual(sl){
+  if(sl.img){return '<div class="visual"><img loading="lazy" src="'+sl.img+'" alt="Lecture slide '+sl.n+'"><div class="caption">Concept visual · '+sl.n+' of '+SLIDES.length+'</div></div>';}
+  const pills=(sl.visual||[]).map(x=>'<span class="visual-pill">'+escHtml(x)+'</span>').join('');
+  return '<div class="visual"><div class="concept-visual"><div class="visual-number">'+String(sl.n).padStart(2,'0')+'</div><div class="visual-kicker">Chapter 5 concept</div><h4>'+escHtml(sl.title||'Concept')+'</h4><div class="visual-pills">'+pills+'</div></div><div class="caption">Concept visual · '+sl.n+' of '+SLIDES.length+'</div></div>';
+}
+
+function render(){
+  if(!sessionId)return;
+  const p=$('sectionPanel');
+
+  const allSectionsHtml=SECTIONS.map(sec=>{
+    const ss=secSlides(sec);
+
+    const lectureHtml=ss.map(sl=>{
+      const note=stripNote(sl.notes);
+      return '<article class="lesson" data-slide-key="'+slideKey(sl.n)+'">'+
+        lectureVisual(sl)+
+        '<div class="explain"><h3>'+(sl.title||'Concept visual')+'</h3>'+
+        '<div class="notes">'+formatNotes(sl,note)+'</div>'+
+        '<div class="teach"><strong>Study move:</strong> Explain the concept aloud in your own words. For algorithms, state what information is being propagated, selected, pruned, or learned and why.</div>'+
+        '</div></article>';
+    }).join('');
+
+    const illustrationHtml=renderIllustrations(sec);
+
+    const cardsHtml='<section class="section-block"><h3>Study cards</h3><p>Open every card. Do not just memorize the term—connect it to the worked examples.</p><div class="cardsGrid">'+
+      (CARDS[sec.id]||[]).map((c,i)=>{
+        const k=studyKey(sec.id,i);
+        return '<div class="card '+(openedKeys.has(k)?'open':'')+'" data-card="'+k+'"><div class="term">'+c[0]+'</div><div class="small card-hint">'+(openedKeys.has(k)?'Tap to hide':'Tap to reveal')+'</div><div class="answer">'+c[1]+'</div></div>';
+      }).join('')+'</div></section>';
+
+    const quizHtml='<section class="section-block"><h3>Knowledge check</h3><p>Answer every question carefully. You have one attempt per question. After you submit an answer, the question is locked and the teaching explanation is shown.</p><div class="quiz">'+
+      (MC[sec.id]||[]).map((q,qi)=>{
+        const qk=questionKey(sec.id,qi);
+        const old=attempted.get(qk);
+        const radioName='q-'+sectionToken(sec.id)+'-'+qi;
+        const opts=q[1].map((o,oi)=>
+          '<label class="opt"><input type="radio" name="'+radioName+'" value="'+oi+'" '+
+          (old&&old.selected_answer==='abcd'[oi]?'checked ':'')+(old?'disabled ':'')+'><span>'+o+'</span></label>'
+        ).join('');
+        const oldfb=old?'<div class="feedback teaching-feedback '+(old.is_correct?'good':'bad')+'">'+
+          teachingFeedback(sec.id,qi,old)+'</div>':'';
+        return '<div class="q"><strong>'+(qi+1)+'. '+q[0]+'</strong>'+opts+
+          '<button class="primary" '+(old?'disabled ':'')+'onclick="checkQ(\''+sec.id+'\','+qi+')">'+(old?'Answer submitted':'Check answer')+'</button>'+
+          '<div class="feedback" role="status" aria-live="polite" id="fb-'+sec.id+'-'+qi+'">'+oldfb+'</div></div>';
+      }).join('')+'</div></section>';
+
+    const top='<div class="sectionHead"><div><h2>'+sec.label+'</h2><p>'+sec.subtitle+'</p></div>'+
+      '<div class="counter">'+(ss.length+sectionIllustrations(sec.id).length)+' concept visuals · '+(CARDS[sec.id]||[]).length+
+      ' study cards · '+(MC[sec.id]||[]).length+' questions</div></div>';
+
+    return '<section class="section-block-wrap" id="section-'+sectionToken(sec.id)+'">'+
+      top+lectureHtml+illustrationHtml+cardsHtml+quizHtml+(sec.id==='review'?receipt():'')+
+      '</section>';
+  }).join('');
+
+  p.innerHTML=allSectionsHtml;
+
+  setTimeout(()=>{
+    document.querySelectorAll('[data-card]').forEach(el=>el.onclick=()=>{
+      el.classList.toggle('open');
+      const hint=el.querySelector('.card-hint');
+      if(hint)hint.textContent=el.classList.contains('open')?'Tap to hide':'Tap to reveal';
+      if(el.classList.contains('open'))recordCard(el.dataset.card);
+    });
+    observeSlides();
+  },0);
+
+  updateProgress();
+}
+async function checkQ(sec,qi){
+  if(apiBusy)return;
+  const qk=questionKey(sec,qi),prior=attempted.get(qk),fb=$('fb-'+sec+'-'+qi),radioName='q-'+sectionToken(sec)+'-'+qi;
+  if(prior){fb.innerHTML=teachingFeedback(sec,qi,prior);fb.className='feedback teaching-feedback '+(prior.is_correct?'good':'bad');return;}
+  const r=document.querySelector('input[name="'+radioName+'"]:checked');
+  if(!r){fb.textContent='Choose one answer carefully. Your answer becomes final only after the server confirms it was recorded.';fb.className='feedback bad';return;}
+  const btn=fb.parentElement?.querySelector('button.primary');
+  apiBusy=true;if(btn){btn.disabled=true;btn.textContent='Recording…';}
+  try{
+    const sel='abcd'[Number(r.value)];
+    const res=await api({action:'answer_knowledge',session_id:sessionId,question_key:qk,selected_answer:sel});
+    const saved={question_key:qk,selected_answer:res.selected_answer??sel,is_correct:res.is_correct,attempt_no:res.attempt_no,correct_answer:res.correct_answer,explanation:res.explanation};
+    attempted.set(qk,saved);completion=res.completion||completion;markSaved();
+    fb.innerHTML=teachingFeedback(sec,qi,saved);fb.className='feedback teaching-feedback '+(saved.is_correct?'good':'bad');
+    document.querySelectorAll('input[name="'+radioName+'"]').forEach(el=>el.disabled=true);
+    if(btn){btn.disabled=true;btn.textContent='Answer submitted';}
+    updateProgress();
+  }catch(e){
+    fb.textContent='Your answer was not recorded. This question is still unlocked; check your connection and submit again. '+(e.message||String(e));fb.className='feedback bad';
+    if(btn){btn.disabled=false;btn.textContent='Check answer';}
+  }finally{apiBusy=false;}
+}
+function localDone(){
+  const t=totals();let cards=0;for(const sec of SECTIONS)for(let i=0;i<(CARDS[sec.id]||[]).length;i++)if(openedKeys.has(studyKey(sec.id,i)))cards++;
+  return {t,cards,questions:attempted.size,views:qualifiedViews.size};
+}
+function gradeBreakdown(){
+  const d=localDone();
+  const totalQuestions=Number(completion?.questions_required??d.t.qTotal);
+  const answered=Number(completion?.questions_answered??d.questions);
+  const correct=Number(completion?.questions_correct??[...attempted.values()].filter(x=>x?.is_correct).length);
+  const completionPoints=Number(completion?.completion_points??0);
+  const accuracyPoints=Number(completion?.accuracy_points??0);
+  const engagementPoints=Number(completion?.engagement_points??0);
+  const grade=Number(completion?.participation_grade??0);
+  const studyRequired=Number(completion?.study_cards_required??d.t.cardTotal);
+  const studyCompleted=Number(completion?.study_cards_completed??d.cards);
+  const lectureViews=Number(completion?.lecture_views_qualified??0);
+  const illustrationViews=Number(completion?.illustration_views_qualified??0);
+  return {d,totalQuestions,answered,correct,completionPoints,accuracyPoints,engagementPoints,grade,studyRequired,studyCompleted,lectureViews,illustrationViews};
+}
+function serverComplete(){return !!completion&&Number(completion.questions_required||0)>0&&Number(completion.questions_answered||0)>=Number(completion.questions_required||0)&&!!completion.completed_at}
+function updateProgress(){
+  const g=gradeBreakdown(),pct=g.totalQuestions?Math.round(g.answered/g.totalQuestions*100):0;
+  $('progressText').textContent='Question progress: '+pct+'%';$('questionText').textContent=g.answered+'/'+g.totalQuestions;$('gradeText').textContent=g.grade.toFixed(1)+'/10';$('barFill').style.width=pct+'%';
+  const btn=$('pdfBtn');if(btn)btn.disabled=!serverComplete();const rs=$('receiptSummary');if(rs)rs.textContent=receiptText();saveStatusText();
+}
+function receipt(){return '<div class="receipt"><h3>Completion & submission</h3><p>Your receipt is generated from the authoritative Supabase completion record. The PDF button becomes available only after the server marks this participation complete.</p><div class="summary" id="receiptSummary">'+receiptText()+'</div><button class="primary" id="pdfBtn" onclick="downloadPDF()" '+(serverComplete()?'':'disabled')+'>Download participation PDF</button></div>'}
+function receiptText(){
+  const g=gradeBreakdown();
+  return 'CS650 Chapter 5 Participation Grade Report\n'+
+    'Student: '+(currentUser?.user_metadata?.full_name||$('ai-student')?.textContent||'—')+'\n'+
+    'School Email: '+($('ai-email')?.textContent||'—')+'\n'+
+    'Section: '+($('ai-section')?.textContent||'—')+'\n'+
+    'Participation grade: '+g.grade.toFixed(2)+'/10\n'+
+    'Question completion: '+g.completionPoints.toFixed(2)+'/7.00 ('+g.answered+'/'+g.totalQuestions+' answered)\n'+
+    'First-attempt accuracy: '+g.accuracyPoints.toFixed(2)+'/2.00 ('+g.correct+'/'+g.totalQuestions+' correct)\n'+
+    'Study-card engagement: '+g.engagementPoints.toFixed(2)+'/1.00 ('+g.studyCompleted+'/'+g.studyRequired+' unique cards opened)\n'+
+    'Qualified lecture views: '+g.lectureViews+'\n'+
+    'Qualified illustrative views: '+g.illustrationViews+'\n'+
+    'Server status: '+(completion?.status||'in progress')+'\n'+
+    'Verification: '+(completion?.verification_code||'pending');
+}
+function downloadPDF(){
+  if(!serverComplete()){
+    alert('Complete all required Chapter 5 participation items first.');
+    return;
+  }
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({unit:'mm',format:'letter'});
+  const pageW=215.9,pageH=279.4,left=16,right=16,bottom=16,contentW=pageW-left-right;
+  let y=18;
+  const g=gradeBreakdown();
+
+  function ensureSpace(needed=12){
+    if(y+needed>pageH-bottom){doc.addPage();y=18;}
+  }
+  function heading(txt,size=14){
+    ensureSpace(10);doc.setFont('helvetica','bold');doc.setFontSize(size);doc.text(txt,left,y);y+=7;
+  }
+  function line(label,value){
+    ensureSpace(7);doc.setFontSize(10);doc.setFont('helvetica','bold');doc.text(label+':',left,y);
+    doc.setFont('helvetica','normal');const x=left+42;const wrapped=doc.splitTextToSize(String(value??'—'),contentW-42);doc.text(wrapped,x,y);y+=Math.max(6,wrapped.length*5);
+  }
+  function para(txt,indent=0,size=9.5){
+    doc.setFont('helvetica','normal');doc.setFontSize(size);
+    const wrapped=doc.splitTextToSize(String(txt||''),contentW-indent);
+    ensureSpace(Math.max(7,wrapped.length*4.6));doc.text(wrapped,left+indent,y);y+=wrapped.length*4.6+2;
+  }
+  function rule(){ensureSpace(5);doc.setDrawColor(150);doc.line(left,y,pageW-right,y);y+=5;}
+
+  doc.setFont('helvetica','bold');doc.setFontSize(18);doc.text('Monroe University',left,y);y+=8;
+  doc.setFontSize(15);doc.text('CS650 Week 5 Participation Grade Report',left,y);y+=10;
+
+  line('Student',$('ai-student').textContent);
+  line('School Email',$('ai-email')?.textContent||'');
+  line('Course',$('ai-course').textContent);
+  line('Term',$('ai-term').textContent);
+  line('Section',$('ai-section').textContent);
+  line('Student ID',$('ai-student-id').textContent);
+  line('Assignment','Week 5 — Chapter 5: Constraint Satisfaction Problems');
+  line('Completed',completion.completed_at?new Date(completion.completed_at).toLocaleString():'');
+  line('Verification Code',completion.verification_code||'');
+  rule();
+
+  heading('Participation Grade',14);
+  line('Final grade',g.grade.toFixed(1)+'/10');
+  line('Question completion',g.completionPoints.toFixed(1)+'/7.0 — '+g.answered+'/'+g.totalQuestions+' questions answered');
+  line('Accuracy',g.accuracyPoints.toFixed(1)+'/2.0 — '+g.correct+'/'+g.totalQuestions+' currently correct');
+  line('Study-card engagement',g.engagementPoints.toFixed(2)+'/1.00 — '+g.studyCompleted+'/'+g.studyRequired+' unique study cards opened');
+  line('Qualified lecture views',g.lectureViews);
+  line('Qualified illustrative views',g.illustrationViews);
+  para('Participation grading model: 7 points for question completion, 2 points for first-attempt correctness, and 1 point for unique study cards opened. Lecture and illustration views are retained as audit evidence but do not inflate the grade.');
+  rule();
+
+  heading('Question-by-Question Results',14);
+  let qNumber=0;
+  for(const sec of SECTIONS){
+    const qs=MC[sec.id]||[];
+    if(!qs.length)continue;
+    ensureSpace(12);
+    doc.setFont('helvetica','bold');doc.setFontSize(11);doc.text(sec.label,left,y);y+=6;
+    for(let qi=0;qi<qs.length;qi++){
+      qNumber++;
+      const q=qs[qi];
+      const key=questionKey(sec.id,qi);
+      const r=attempted.get(key);
+      const correctLetter=String(r?.correct_answer||'').toUpperCase();
+      const correctIndex='ABCD'.indexOf(correctLetter);
+      const correctText=correctIndex>=0?(q[1]||[])[correctIndex]:'Available after submission';
+      const selectedLetter=String(r?.selected_answer||'').toUpperCase();
+      const selectedIndex='ABCD'.indexOf(selectedLetter);
+      const selectedText=selectedIndex>=0?(q[1]||[])[selectedIndex]:'Not answered';
+      const explanation=r?.explanation||'Available after submission.';
+      ensureSpace(34);
+      doc.setFont('helvetica','bold');doc.setFontSize(10);para(qNumber+'. '+q[0],0,10);
+      line('Student answer',selectedLetter?selectedLetter+'. '+selectedText:'Not answered');
+      line('Result',r?(r.is_correct?'Correct':'Incorrect'):'Not answered');
+      line('Correct answer',correctLetter+'. '+correctText);
+      doc.setFont('helvetica','bold');doc.setFontSize(9.5);ensureSpace(6);doc.text('Why:',left,y);y+=5;
+      para(explanation,4,9.2);
+      y+=2;
+    }
+  }
+
+  rule();
+  heading('Record Verification',12);
+  para('This report was generated from the student’s CS650 participation record. The verification code can be used by the instructor to match the PDF to the authoritative participation record.');
+  line('Server status',completion?.status||'complete');
+  line('Verification Code',completion?.verification_code||'');
+
+  doc.save('CS650_Chapter5_Grade_Report_'+(completion.verification_code||'complete')+'.pdf');
+}
+// Student ID Auth v2: bind this page directly to the Student-ID auth flow.
+const signInBtn=$('auth-signin'), signUpBtn=$('auth-signup'), signOutBtn=$('auth-signout');
+if(signInBtn)signInBtn.addEventListener('click',signIn);
+if(signUpBtn)signUpBtn.addEventListener('click',signUp);
+if(signOutBtn)signOutBtn.addEventListener('click',signOut);
+
+client.auth.onAuthStateChange((event,session)=>{
+  currentUser=session?.user||null;
+  if(event==='SIGNED_IN'||event==='TOKEN_REFRESHED'||event==='USER_UPDATED')setTimeout(()=>bootstrap(),0);
+  if(event==='SIGNED_OUT')setTimeout(()=>bootstrap(),0);
+});
+client.auth.getSession().then(()=>bootstrap());
+</script></body></html>
