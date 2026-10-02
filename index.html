@@ -32,7 +32,7 @@ footer{margin-top:70px;padding:26px 0 8px;border-top:1px solid var(--rule);color
 @media(max-width:650px){.topbar-inner{align-items:flex-start;flex-direction:column}.topnav{gap:10px}.topnav a{min-height:36px;display:flex;align-items:center}.portrait-card{max-width:300px}}
 </style>
 </head>
-<body>
+<body data-course="CS650" data-plan-style="activity">
 <a class="skip" href="#main">Skip to content</a>
 <header class="topbar"><div class="topbar-inner"><div class="brand">CS650<small>Artificial Intelligence</small></div>
 
@@ -55,25 +55,10 @@ footer{margin-top:70px;padding:26px 0 8px;border-top:1px solid var(--rule);color
 
 <section class="section" id="objectives"><p class="eyebrow">Course Learning Objectives</p><h2>What you should be able to do</h2><ul class="objectives"><li>Explain the basic knowledge-representation, problem-solving, and learning methods of Artificial Intelligence.</li><li>Assess the applicability, strengths, and weaknesses of those methods for particular engineering problems.</li><li>Develop intelligent systems by assembling solutions to concrete computational problems.</li><li>Understand the role of knowledge representation, problem solving, and learning in intelligent-system engineering.</li><li>Develop sufficient interest and foundation to pursue more advanced subjects in Artificial Intelligence.</li></ul></section>
 
-<section class="section" id="activities"><p class="eyebrow">Weekly Course Roadmap</p><h2>Your course activity hub</h2><p class="section-intro">The weekly roadmap below follows the course syllabus. Participation pages will be activated as they are assigned. Students should complete only the participation activity assigned for the current class period.</p><div class="activities">
-<article class="activity"><div><div class="activity-num">Week 1 · Chapter 1</div><h3>Introduction</h3><p>What is AI? Foundations of AI, history of AI, and the state of the art.</p></div><div class="status soon">Course roadmap</div></article>
-<article class="activity"><div><div class="activity-num">Week 2 · Chapter 2</div><h3>Intelligent Agents</h3><p>Agents and environments, rationality, the nature of environments, and agent structure.</p></div><div class="status soon">Course roadmap</div></article>
-<article class="activity active" data-week="3"><div><div class="activity-num" data-week-label>Week 3</div><h3>Solving Problems by Searching</h3><p>Problem-solving agents, example problems, searching for solutions, uninformed search, informed search, and heuristic functions.</p></div><div><div class="status" data-week-status>Available now</div><a href="week03/" data-week-link>Open Week 3 →</a></div></article>
-<article class="activity exam"><div><div class="activity-num">Week 4</div><h3>Exam 1</h3><p>First major course examination.</p></div><div class="status soon">Exam</div></article>
-<article class="activity"><div><div class="activity-num">Week 5 · Chapter 5</div><h3>Adversarial Search</h3><p>Games, optimal decisions, alpha-beta pruning, imperfect real-time decisions, stochastic games, partially observable games, and game programs.</p></div><div class="status soon">Course roadmap</div></article>
-<article class="activity"><div><div class="activity-num">Week 6 · Chapter 7</div><h3>Logical Agents</h3><p>Knowledge-based agents, the Wumpus World, logic, propositional logic, theorem proving, model checking, and agents based on propositional logic.</p></div><div class="status soon">Course roadmap</div></article>
-<article class="activity"><div><div class="activity-num">Week 7 · Chapter 8</div><h3>First-Order Logic</h3><p>Representation revisited, syntax and semantics, using first-order logic, and knowledge engineering.</p></div><div class="status soon">Course roadmap</div></article>
-<article class="activity"><div><div class="activity-num">Week 8 · Chapter 9</div><h3>Inference in First-Order Logic</h3><p>Propositional versus first-order inference, unification, lifting, forward chaining, backward chaining, and resolution.</p></div><div class="status soon">Course roadmap</div></article>
-<article class="activity"><div><div class="activity-num">Week 9 · Chapter 10</div><h3>Classical Planning</h3><p>Classical planning, planning as state-space search, planning graphs, and analysis of planning approaches.</p></div><div class="status soon">Course roadmap</div></article>
-<article class="activity exam"><div><div class="activity-num">Week 10</div><h3>Exam</h3><p>Second major course examination.</p></div><div class="status soon">Exam</div></article>
-<article class="activity"><div><div class="activity-num">Week 11 · Chapter 11</div><h3>Planning and Acting in the Real World</h3><p>Time, schedules, resources, hierarchical planning, nondeterministic domains, and multiagent planning.</p></div><div class="status soon">Course roadmap</div></article>
-<article class="activity"><div><div class="activity-num">Week 12 · Chapter 13</div><h3>Quantifying Uncertainty</h3><p>Acting under uncertainty, probability notation, joint distributions, independence, Bayes' rule, and the Wumpus World revisited.</p></div><div class="status soon">Course roadmap</div></article>
-<article class="activity"><div><div class="activity-num">Week 13 · Chapter 18</div><h3>Learning from Examples</h3><p>Forms of learning, supervised learning, decision trees, model evaluation, learning theory, regression/classification, neural networks, support vector machines, ensemble learning, and practical machine learning.</p></div><div class="status soon">Course roadmap</div></article>
-<article class="activity"><div><div class="activity-num">Week 14 · Chapter 25</div><h3>Robotics</h3><p>Robot hardware, motion planning, uncertain movement, moving, robot software architectures, and application domains.</p></div><div class="status soon">Course roadmap</div></article>
-<article class="activity exam"><div><div class="activity-num">Week 15</div><h3>Final Exam / Final Project</h3><p>Final course examination and final project.</p></div><div class="status soon">Final assessment</div></article>
-</div><div class="notice"><strong>Participation rule:</strong> Open only the participation assignment assigned by Professor Kassoh. When a participation module is assigned, complete all required lecture interactions, study cards, and knowledge checks while signed in, then download the verified PDF receipt for Blackboard submission.</div></section>
+<section class="section" id="activities"><p class="eyebrow">Current Section Plan</p><h2>Your course activity hub</h2><p class="section-intro">This roadmap is generated from the current semester plan in the Instructor Control Center, so activity order, Blackboard alignment, participation pages, exams, and projects can change without rebuilding this page.</p><p id="planContext" class="eyebrow"></p><div id="dynamicCoursePlan" class="activities"><div class="notice">Loading current course plan…</div></div><div class="notice"><strong>Participation rule:</strong> Open only the participation assignment assigned by Professor Kassoh. When a participation module is assigned, complete all required lecture interactions, study cards, and knowledge checks while signed in, then download the verified PDF receipt for Blackboard submission.</div></section>
 <footer>CS650 · Artificial Intelligence · Monroe University</footer>
 </main>
-<script src="assets/week-auto-activate.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
+<script src="assets/course-home-dynamic.js" defer></script>
 </body>
 </html>
