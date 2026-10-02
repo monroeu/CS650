@@ -1,0 +1,29 @@
+name: Sync participation catalog
+on:
+  push:
+    branches: [main]
+    paths:
+      - '**/participation.json'
+      - '.github/workflows/sync-participation.yml'
+  workflow_dispatch:
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build metadata payload
+        run: |
+          files=$(find . -name participation.json -not -path './.git/*' -print)
+          if [ -z "$files" ]; then echo '{"items":[]}' > /tmp/payload.json; else jq -s '{items:.}' $files > /tmp/payload.json; fi
+          cat /tmp/payload.json
+      - name: Sync with Supabase
+        env:
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+        run: |
+          test -n "$SUPABASE_SECRET_KEY" || (echo "Missing repository secret SUPABASE_SECRET_KEY" && exit 1)
+          curl --fail-with-body --request POST \
+            'https://irnrjzeejalbbqdrbzmj.supabase.co/functions/v1/github-assignment-sync' \
+            --header "apikey: $SUPABASE_SECRET_KEY" \
+            --header "Authorization: Bearer $SUPABASE_SECRET_KEY" \
+            --header 'Content-Type: application/json' \
+            --data-binary @/tmp/payload.json
