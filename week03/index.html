@@ -411,6 +411,11 @@ nav.sections{display:none!important}
 
 </style>
 
+
+<!-- Monroe participation standard (same shared files as MG628) -->
+<link rel="stylesheet" href="../shared/student-login-standard.css">
+<script>window.MONROE_LOGIN_WEEK="week03";window.MONROE_LOGIN_ROOT="#authBox";window.MONROE_LOGIN_COURSE="CS650";window.MONROE_LOGIN_TERM="Fall 2026";
+window.MONROE_PDF_CONFIG={"course":"CS650","week":"03","lab":"CS650 Week 3 Participation — Chapter 3: Solving Problems by Searching","term":"Fall 2026"};</script>
 </head>
 <body><header><div class="top"><div class="brand"><strong>CS650 · Artificial Intelligence</strong><span>Week 3 Participation · Chapter 3: Solving Problems by Searching</span></div><div class="progressWrap">
   <div class="studentProgressSummary" aria-live="polite">
@@ -1125,4 +1130,11 @@ client.auth.onAuthStateChange((event,session)=>{
   if(event==='SIGNED_OUT')setTimeout(()=>bootstrap(),0);
 });
 client.auth.getSession().then(()=>bootstrap());
-</script></body></html>
+</script>
+<!-- Monroe participation standard: PDF report, active study time, login presentation -->
+<script src="../shared/participation-pdf.js"></script>
+<script defer src="../shared/participation-adapter.js"></script>
+<script defer src="../shared/active-time.js"></script>
+<script defer src="../shared/student-login-standard.js"></script>
+<script src="../shared/cs650-participation-standard.js"></script>
+</body></html>
