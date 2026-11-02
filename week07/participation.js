@@ -67,7 +67,14 @@
       try {
         const r = await api({ action: 'bootstrap' }); bootData = r;
         const off = (r.offerings || []).find(o => o.assignment?.slug === CFG.slug && Number(o.assignment?.version) === Number(CFG.version));
-        if (!off) { lock(); setStatus('Signed in, but this Student ID is not on the CS650 roster for this lab, or it has not been published yet. Contact Professor Kassoh.', 'err'); return; }
+        if (!off) {
+          lock();
+          const enrolled = (r.enrollments || []).some(e => /CS\s*-?\s*650/i.test(e.section?.course?.code || ''));
+          setStatus(enrolled
+            ? 'Signed in and on the CS650 roster, but the ' + CFG.label + ' lab has not been published for your section yet. Check back later or contact Professor Kassoh.'
+            : 'Signed in, but this Student ID is not on a CS650 roster. Contact Professor Kassoh.', 'err');
+          return;
+        }
         offering = off;
         showIdentity(r, (r.enrollments || []).find(e => e.section_id === off.section_id));
         let res = await api({ action: 'resume_session', offering_id: off.id });
