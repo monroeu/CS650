@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="../favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CS650 Week 7 Participation — Chapters 7–8: Logical Agents and First-Order Logic</title>
+<meta name="description" content="Narrated, step-by-step lectures for Chapters 7 and 8 of AIMA, with flip cards, knowledge checks and multiple-choice practice.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1B2430; --ink2:#4A5563; --mute:#6B7684; --line:#D5DAE1; --panel:#F2F4F7; --page:#FFFFFF;
+  --teal:#17606F; --tealT:#E3F1F3; --red:#B3202F; --redT:#FBE9EB; --amber:#8A5A00; --amberT:#FFF4D6; --mark:#D98E04;
+  --stage:#1B2430; --focus:#1F7A8C;
+  --serif:"Source Serif 4", Cambria, Georgia, serif; --sans:"Atkinson Hyperlegible", Calibri, "Segoe UI", system-ui, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#E9EDF2; --ink2:#C3CAD4; --mute:#97A1AE; --line:#2E3A48; --panel:#1C2631; --page:#121A23;
+    --teal:#6CC3D2; --tealT:#16343B; --red:#F07A86; --redT:#3A1D22; --amber:#F2C462; --amberT:#3A2E12; --stage:#0B1118; --focus:#6CC3D2;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#E9EDF2; --ink2:#C3CAD4; --mute:#97A1AE; --line:#2E3A48; --panel:#1C2631; --page:#121A23;
+  --teal:#6CC3D2; --tealT:#16343B; --red:#F07A86; --redT:#3A1D22; --amber:#F2C462; --amberT:#3A2E12; --stage:#0B1118; --focus:#6CC3D2;
+  color-scheme: dark;
+}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 64px)}
+body{margin:0;background:var(--page);color:var(--ink);font:17px/1.6 var(--sans)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+a{color:var(--teal)}
+h1,h2,h3{font-family:var(--serif);line-height:1.2;margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--page);z-index:30}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--page);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:10px 18px}
+.top .brand{font-family:var(--serif);font-weight:700;font-size:18px;text-decoration:none;color:var(--ink);white-space:nowrap}
+.top .grow{flex:1}
+.progress{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink2)}
+.progress .bar{width:120px;height:8px;border-radius:4px;background:var(--panel);overflow:hidden}
+.progress .bar i{display:block;height:100%;background:var(--teal);width:0}
+.iconbtn{background:none;border:1px solid var(--line);border-radius:8px;padding:6px 10px;cursor:pointer}
+.menu-btn{display:none}
+
+/* layout */
+.shell{display:grid;grid-template-columns:290px minmax(0,1fr);min-height:calc(100vh - 56px)}
+nav.rail{border-right:1px solid var(--line);padding:18px 14px 40px;position:sticky;top:57px;align-self:start;max-height:calc(100vh - 57px);overflow:auto}
+.rail h2{font-size:15px;color:var(--ink2);margin:18px 8px 8px;font-family:var(--sans);font-weight:700}
+.rail h2:first-child{margin-top:4px}
+.rail a{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:8px;text-decoration:none;color:var(--ink);font-size:15px;line-height:1.35}
+.rail a:hover{background:var(--panel)}
+.rail a[aria-current="page"]{background:var(--tealT);color:var(--teal);font-weight:700}
+.rail .tick{flex:none;width:20px;height:20px;border-radius:50%;border:2px solid var(--line);margin-top:1px;display:grid;place-items:center;font-size:12px;color:#fff}
+.rail .tick.part{border-color:var(--teal)}
+.rail .tick.done{background:var(--teal);border-color:var(--teal)}
+.rail .extra{margin-top:18px;border-top:1px solid var(--line);padding-top:12px}
+main{padding:28px clamp(16px,4vw,48px) 80px;max-width:1120px;width:100%}
+
+/* home */
+.intro h1{font-size:clamp(30px,4.4vw,46px);max-width:20ch;margin-bottom:14px}
+.intro p{max-width:62ch;color:var(--ink2);margin:0 0 12px}
+.chapgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;margin-top:28px}
+.chap{border:1px solid var(--line);border-radius:14px;padding:20px 22px}
+.chap h2{font-size:22px;margin-bottom:6px}
+.chap ol{margin:10px 0 0;padding-left:22px}
+.chap li{margin:4px 0}
+.how{margin-top:30px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.how div{background:var(--panel);border-radius:12px;padding:16px 18px}
+.how strong{display:block;font-family:var(--serif);font-size:18px;margin-bottom:4px}
+.btn{display:inline-flex;align-items:center;gap:8px;background:var(--teal);color:#fff;border:0;border-radius:10px;padding:11px 18px;font-weight:700;cursor:pointer;text-decoration:none}
+:root[data-theme="dark"] .btn{color:#0B1118}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn{color:#0B1118}}
+.btn.ghost{background:none;color:var(--teal);border:2px solid var(--teal)}
+
+/* section */
+.sechead{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px;margin-bottom:14px}
+.sechead h1{font-size:clamp(26px,3.4vw,36px)}
+.sechead .meta{color:var(--ink2);font-size:15px}
+.stage-wrap{background:var(--stage);border-radius:14px;padding:10px;position:relative}
+.stage{position:relative;width:100%;aspect-ratio:16/9;background:#fff;border-radius:6px;overflow:hidden}
+.stage img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block}
+.stage svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.mk{fill:none;stroke:var(--mark);stroke-width:.045;stroke-linecap:round;transition:stroke-dashoffset .65s ease-out, opacity .2s;opacity:0}
+.mk.ul,.mk.arrow{stroke:#B3202F;stroke-width:.055}
+.mk.on{opacity:1;stroke-dashoffset:0!important}
+.mk.hl{stroke:none;fill:#FFD54F;opacity:0;transition:opacity .5s}
+.mk.hl.on{opacity:.4}
+.bigplay{position:absolute;inset:0;margin:auto;width:92px;height:92px;border-radius:50%;border:0;background:rgba(23,96,111,.92);color:#fff;font-size:34px;cursor:pointer;display:grid;place-items:center;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+.bigplay[hidden]{display:none}
+.slidebar{height:4px;background:rgba(255,255,255,.15);border-radius:2px;margin:8px 2px 0;overflow:hidden}
+.slidebar i{display:block;height:100%;width:0;background:var(--mark)}
+.controls{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 2px 2px;color:#E9EDF2}
+.controls button,.controls select{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);color:#fff;border-radius:8px;padding:7px 12px;cursor:pointer;font-size:15px}
+.controls select option{color:#1B2430}
+.controls .count{font-size:14px;min-width:92px;text-align:center}
+.controls .grow{flex:1}
+.controls input[type=range]{flex:1 1 180px;accent-color:#F2C462}
+.caption{min-height:3.4em;margin:12px 4px 0;font-size:17px;color:var(--ink);max-width:80ch}
+.caption[hidden]{display:none}
+.slidetitle{font-size:14px;color:var(--ink2);margin:10px 4px 0}
+.done-note{margin-top:12px;background:var(--tealT);color:var(--teal);border-radius:10px;padding:12px 16px;font-weight:700}
+.done-note[hidden]{display:none}
+.heard{margin:8px 4px 0;font-size:14px;color:var(--ink2)}
+.heard:empty{display:none}
+
+/* practice */
+.block{margin-top:44px}
+.block h2{font-size:26px;margin-bottom:4px}
+.block > p.hint{margin:0 0 16px;color:var(--ink2)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.flip{display:block;width:100%;perspective:900px;border:0;padding:0;background:none;cursor:pointer;min-height:170px;text-align:left}
+.flip .in{display:block;position:relative;width:100%;height:100%;min-height:170px;transition:transform .5s;transform-style:preserve-3d}
+.flip.on .in{transform:rotateY(180deg)}
+.flip .f,.flip .b{position:absolute;inset:0;border-radius:12px;padding:18px;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;flex-direction:column;justify-content:center}
+.flip .f{background:var(--panel);border:1px solid var(--line)}
+.flip .f strong{font-family:var(--serif);font-size:21px;line-height:1.25}
+.flip .f span{margin-top:10px;font-size:13px;color:var(--mute)}
+.flip .b{background:var(--tealT);color:var(--ink);transform:rotateY(180deg);font-size:15.5px;line-height:1.5}
+.qlist{display:grid;gap:14px}
+.q{border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.q .stem{font-weight:700;margin-bottom:10px}
+.q .opts{display:grid;gap:8px}
+.q .opt{display:flex;gap:10px;align-items:flex-start;text-align:left;background:var(--page);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer}
+.q .opt .l{flex:none;width:26px;height:26px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font-size:13px;font-weight:700}
+.q .opt:hover:not([disabled]){border-color:var(--teal)}
+.q .opt[disabled]{cursor:default}
+.q .opt.right{border-color:var(--teal);background:var(--tealT)}
+.q .opt.right .l{background:var(--teal);color:#fff;border-color:var(--teal)}
+.q .opt.wrong{border-color:var(--red);background:var(--redT)}
+.q .opt.wrong .l{background:var(--red);color:#fff;border-color:var(--red)}
+.tf{display:flex;gap:10px}
+.tf .opt{flex:1;justify-content:center}
+.fb{margin-top:10px;border-radius:10px;padding:10px 14px;font-size:15.5px}
+.fb.ok{background:var(--tealT);color:var(--ink)}
+.fb.no{background:var(--redT);color:var(--ink)}
+.fb b{display:block;margin-bottom:2px}
+.fb .review{margin-top:8px;background:none;border:0;color:var(--teal);font-weight:700;padding:0;cursor:pointer;text-decoration:underline}
+.score{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:16px;font-weight:700}
+.next{margin-top:40px;display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;border-top:1px solid var(--line);padding-top:20px}
+
+/* summary */
+table.sum{width:100%;border-collapse:collapse;margin-top:18px;font-size:15.5px}
+table.sum th,table.sum td{border-bottom:1px solid var(--line);padding:10px 8px;text-align:left}
+table.sum th{color:var(--ink2);font-weight:700}
+.tablewrap{overflow-x:auto}
+
+@media (max-width: 900px){
+  .shell{grid-template-columns:1fr}
+  nav.rail{position:fixed;top:57px;left:0;bottom:0;width:min(320px,88vw);background:var(--page);z-index:25;transform:translateX(-105%);transition:transform .25s;max-height:none;box-shadow:0 10px 40px rgba(0,0,0,.2)}
+  nav.rail.open{transform:none}
+  .menu-btn{display:inline-block}
+  .progress .bar{width:70px}
+  .controls .count{min-width:auto}
+}
+@media (max-width: 520px){
+  body{font-size:16px}
+  .top .brand{font-size:16px}
+  .progress span{display:none}
+  .stage-wrap{padding:6px;border-radius:10px;margin:0 -8px}
+}
+@media (prefers-reduced-motion: reduce){
+  .mk{transition:opacity .2s}
+  .flip .in{transition:none}
+  nav.rail{transition:none}
+}
+
+/* participation standard */
+.homelink{font-size:14px;color:var(--ink2);text-decoration:none;border-left:1px solid var(--line);padding-left:12px;white-space:nowrap}
+.homelink:hover{color:var(--teal)}
+@media (max-width:520px){.homelink{display:none}}
+.mainwrap{min-width:0}
+.authbox{margin:24px clamp(16px,4vw,48px) 0;max-width:1024px;border:1px solid var(--line);border-radius:14px;padding:18px 22px;background:var(--panel)}
+.authbox h2{font-size:22px;margin:0 0 6px}
+.authbox p{margin:0 0 12px;color:var(--ink2);font-size:15px}
+.authgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.authgrid label{display:block;font-size:13px;font-weight:700;margin-bottom:4px}
+.authgrid input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font:inherit;background:var(--page);color:var(--ink)}
+.authactions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.authactions button{background:var(--teal);color:#fff;border:0;border-radius:9px;padding:10px 16px;font-weight:700;cursor:pointer}
+.authactions button[hidden]{display:none}
+.gate-note{margin-top:10px;font-size:14.5px;color:var(--ink2)}
+.gate-note.status-ok{color:var(--teal);font-weight:700}
+.gate-note.status-err{color:var(--red);font-weight:700}
+.identity{margin-top:12px;border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--page)}
+.identity[hidden]{display:none}
+.server-badge{display:inline-block;background:var(--tealT);color:var(--teal);font-weight:700;font-size:12px;border-radius:999px;padding:3px 10px}
+.identity-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin-top:8px}
+.identity-grid span{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--mute)}
+#cs650-active-time{margin-top:8px;font-size:14.5px;font-weight:700;color:var(--teal)}
+#cs650-active-time:empty{display:none}
+body.lab-locked .stage-wrap,body.lab-locked .block{opacity:.45;pointer-events:none;filter:grayscale(.3)}
+body.lab-locked .bigplay{display:none}
+.lockbanner{display:none;margin:0 0 14px;background:var(--amberT);color:var(--amber);border-radius:10px;padding:10px 14px;font-weight:700}
+body.lab-locked .lockbanner{display:block}
+.presence{position:fixed;inset:0;background:rgba(11,17,24,.55);display:grid;place-items:center;z-index:200;padding:20px}
+.presence[hidden]{display:none}
+.presence div{background:var(--page);color:var(--ink);border-radius:14px;padding:24px 26px;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.presence h2{font-size:22px;margin:0 0 8px}
+.presence p{margin:0 0 16px;color:var(--ink2)}
+</style>
+<link rel="stylesheet" href="../shared/student-login-standard.css">
+<script>window.LAB_PARTICIPATION={"slug":"chapter-07-08-logical-agents-fol","version":1,"label":"Week 7"};
+window.MONROE_LOGIN_WEEK="week07";window.MONROE_LOGIN_ROOT="#authBox";window.MONROE_LOGIN_COURSE="CS650";window.MONROE_LOGIN_TERM="Fall 2026";
+window.MONROE_PDF_CONFIG={"course":"CS650","week":"07","lab":"CS650 Week 7 Participation — Chapters 7–8: Logical Agents and First-Order Logic","term":"Fall 2026"};</script>
+</head>
+<body class="lab-locked">
+<header class="top">
+  <button class="iconbtn menu-btn" id="menuBtn" aria-label="Show sections" aria-expanded="false">☰</button>
+  <a class="brand" href="#home">CS650 Week 7 · Chapters 7–8</a>
+  <a class="homelink" href="../">CS650 home</a>
+  <span class="grow"></span>
+  <div class="progress" title="Sections completed"><span id="progText">0 of 13 sections</span><div class="bar"><i id="progBar"></i></div></div>
+</header>
+<div class="shell">
+  <nav class="rail" id="rail" aria-label="Sections"></nav>
+  <div class="mainwrap">
+  <section class="authbox" id="authBox">
+    <h2>Student Login</h2>
+    <p>Sign in with your Monroe University Student ID. Your name, course, term and section come from the instructor roster. Lectures, practice and study time are recorded only while you are signed in.</p>
+    <div id="authFields">
+      <div class="authgrid">
+        <div><label for="auth-student-id">Student ID</label><input id="auth-student-id" inputmode="numeric" autocomplete="username" placeholder="Monroe University Student ID"></div>
+        <div><label for="auth-password">Password</label><input id="auth-password" type="password" autocomplete="current-password" placeholder="Password"></div>
+      </div>
+      <div class="authactions"><button id="auth-signin" type="button">Sign in</button><button id="auth-signup" type="button">Create account</button></div>
+    </div>
+    <div class="authactions"><button id="auth-signout" type="button" hidden>Sign out</button></div>
+    <div id="auth-status" class="gate-note">Sign in before beginning. Work completed while signed out cannot be credited.</div>
+    <div id="academic-identity" class="identity" hidden><span class="server-badge">Roster verified</span>
+      <div class="identity-grid"><div><span>Student</span><strong id="ai-student">—</strong></div><div><span>Student ID</span><strong id="ai-student-id">—</strong></div><div><span>Course</span><strong id="ai-course">—</strong></div><div><span>Section</span><strong id="ai-section">—</strong></div><div><span>Term</span><strong id="ai-term">—</strong></div></div>
+    </div>
+    <div id="cs650-active-time" aria-live="polite"></div>
+  </section>
+  <main id="main" tabindex="-1"></main>
+</div>
+</div>
+<audio id="audio" preload="auto"></audio>
+<div class="presence" id="presence" hidden role="dialog" aria-modal="true" aria-labelledby="presence-title"><div>
+  <h2 id="presence-title">Still there?</h2>
+  <p>The lecture has paused because there has been no click, tap or key press for 10 minutes. Study time is only recorded while you are taking part.</p>
+  <button class="btn" id="presence-continue" type="button">Continue the lecture</button>
+</div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+<script src="../shared/participation-pdf.js"></script>
+<script defer src="../shared/participation-adapter.js"></script>
+<script defer src="../shared/active-time.js"></script>
+<script defer src="../shared/student-login-standard.js"></script>
+<script src="data.js"></script>
+<script src="quiz.js"></script>
+<script src="app.js"></script>
+<script src="participation.js"></script>
+</body>
+</html>

@@ -414,6 +414,11 @@ nav.sections{display:none!important}
 .concept-visual{min-height:220px;padding:22px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(145deg,#f7fbf9,#eef5f2);display:flex;flex-direction:column;justify-content:center}.concept-visual .visual-kicker{font-family:var(--font-mono);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent2);font-weight:800;margin-bottom:10px}.concept-visual h4{font-size:1.25rem;margin:0 0 14px;color:var(--ink)}.concept-visual .visual-pills{display:flex;flex-wrap:wrap;gap:9px}.concept-visual .visual-pill{padding:8px 10px;border-radius:999px;background:white;border:1px solid var(--line);font-size:.9rem;font-weight:700;color:#3e554c}.concept-visual .visual-number{font-size:3rem;font-weight:900;color:rgba(47,111,99,.16);line-height:1;margin-bottom:4px}@media(max-width:620px){.concept-visual{min-height:180px;padding:18px}.concept-visual h4{font-size:1.12rem}}
 </style>
 
+
+<!-- Monroe participation standard (same shared files as MG628) -->
+<link rel="stylesheet" href="../shared/student-login-standard.css">
+<script>window.MONROE_LOGIN_WEEK="week05";window.MONROE_LOGIN_ROOT="#authBox";window.MONROE_LOGIN_COURSE="CS650";window.MONROE_LOGIN_TERM="Fall 2026";
+window.MONROE_PDF_CONFIG={"course":"CS650","week":"05","lab":"CS650 Week 5 Participation — Chapter 5: Constraint Satisfaction Problems","term":"Fall 2026"};</script>
 </head>
 <body><header><div class="top"><div class="brand"><strong>CS650 · Artificial Intelligence</strong><span>Week 5 Participation · Chapter 5: Constraint Satisfaction Problems</span></div><div class="progressWrap">
   <div class="studentProgressSummary" aria-live="polite">
@@ -1021,4 +1026,11 @@ client.auth.onAuthStateChange((event,session)=>{
   if(event==='SIGNED_OUT')setTimeout(()=>bootstrap(),0);
 });
 client.auth.getSession().then(()=>bootstrap());
-</script></body></html>
+</script>
+<!-- Monroe participation standard: PDF report, active study time, login presentation -->
+<script src="../shared/participation-pdf.js"></script>
+<script defer src="../shared/participation-adapter.js"></script>
+<script defer src="../shared/active-time.js"></script>
+<script defer src="../shared/student-login-standard.js"></script>
+<script src="../shared/cs650-participation-standard.js"></script>
+</body></html>
