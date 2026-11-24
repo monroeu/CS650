@@ -1,449 +1,309 @@
+/* CS650 Week 11 lab v3 — modules 1–4: Introduction, 11.1, 11.2, 11.3.
+   "learn" is the Read pamphlet; cards, check and mcq follow. Slide ranges match the v3 deck. */
 window.LAB_MODULES = window.LAB_MODULES || [];
+(function () {
+const K = window.PK, f = K.f, ck = K.chip;
+
 window.LAB_MODULES.push(
+/* ======================================================================= */
 {
-  id: "intro", kind: "section", part: "p1", slides: [1, 4],
-  label: "Start", title: "Welcome and the Notation Toolkit",
-  blurb: "Why planning, the two running worlds (Air Cargo and Northgate General), and a refresher on the formal notation from Chapters 7–10 that Chapter 11 builds on.",
-  learn: `
-<h3>1. Why planning?</h3>
-<p>Chapter 3's search agents needed a human to write a new heuristic for every problem. Chapter 7's logical agents needed the same rule copied for every time step and every square. Planning fixes both. <b>Action schemas</b> let one template, with variables, stand for every specific action. <b>Factored states</b>, made of named facts, let the computer work out its own heuristics. NASA's Remote Agent (Deep Space One, 1999) and Hitachi's factory scheduler were built on these ideas.</p>
-<h3>2. Two worlds, one toolkit</h3>
-<p>Every idea in this chapter is shown twice: on the textbook's <b>Air Cargo</b> problem (cargo C1 and C2, planes P1 and P2, airports SFO and JFK) and on <b>Northgate General Hospital</b> (Maria Santos, Dr. Okafor, Nurse Priya, Operating Room 3). A <b>domain-independent</b> planner runs the same code on both; only the names change.</p>
-<h3>3. The notation you will use (Chapters 7–10)</h3>
-<p>Planning is written in logic, so the notation from earlier chapters returns.</p>
-<div class="rule"><b>Ch 7, propositional logic:</b> <span class="f">¬</span> not · <span class="f">∧</span> and · <span class="f">∨</span> or · <span class="f">⇒</span> implies · <span class="f">⇔</span> if and only if · <span class="f">KB ⊨ α</span> “the KB entails α”: α is true in every model where the KB is true.</div>
-<div class="rule"><b>Ch 8–9, first-order logic:</b> <span class="f">∀x</span> for all · <span class="f">∃x</span> there exists · predicates such as <span class="f">At(C1, SFO)</span> · functions such as <span class="f">Mother(John)</span> · a substitution <span class="f">θ = {x/John}</span> · <span class="f">UNIFY(p, q)</span> finds the θ that makes p and q identical.</div>
-<div class="rule"><b>Ch 10, categories:</b> <span class="f">Maria ∈ Patients</span> (membership) · <span class="f">SurgicalPatients ⊂ Patients</span> (subcategory); members inherit the properties of every category above them.</div>
-<div class="ex"><div class="ex-h">Worked example: entailment at Northgate</div>
-KB: <span class="f">Fever ∧ HighHR ⇒ SepsisRisk</span>, <span class="f">Fever</span>, <span class="f">HighHR</span>.<br>
-There are 2³ = 8 models of the three symbols. Only one makes all three KB sentences true (Fever = T, HighHR = T, SepsisRisk = T), and in it SepsisRisk is true. So <span class="f">KB ⊨ SepsisRisk</span>.</div>
-<h3>4. Writing conventions in this lab</h3>
-<ul><li><b>Upper-case</b> names are constants and predicates: <span class="f">Maria</span>, <span class="f">At</span>, <span class="f">SFO</span>. <b>Lower-case</b> names are variables: <span class="f">x</span>, <span class="f">p</span>, <span class="f">from</span>.</li>
-<li>In planning, a fact is a ground atom such as <span class="f">At(P1, SFO)</span>; a state is the set of facts that are true right now.</li></ul>
-<div class="mistake"><b>Common mistake:</b> reading <span class="f">P ⇒ Q</span> as “P causes Q”. It only says Q is true whenever P is true; it is false in exactly one case, P true and Q false.</div>`,
+  id: "intro", kind: "section", part: "p1", slides: [1, 8],
+  label: "Start", title: "Welcome: You Already Know How to Plan",
+  blurb: "What planning is, the two worlds we use all chapter (Air Cargo and Northgate General), and the logic symbols from Chapters 7–10 that you will read and write.",
+  learn: K.top("Intro", "You Already Know How to Plan", 10, ["say what an automated planner does, in one sentence", "name the two running examples and their objects", "read the symbols ¬ ∧ ∨ ⇒ ∀ ∃ and a fact like At(C2, JFK) out loud"]) + `
+<h3>1. A plan is a recipe you can check before you cook</h3>
+<p>Every morning you plan without noticing: find the keys, then lock the door, then walk to the bus. The <b>order</b> matters (you can't lock the door before you find the keys), and you can check the plan in your head <b>before</b> doing anything.</p>
+${K.big(`An automated planner does exactly this for a computer: given <b>where we are</b>, <b>what we want</b>, and <b>what actions are possible</b>, it finds a <b>sequence of actions</b> that gets from one to the other, and it can prove the sequence works before anything happens.`)}
+${K.flow([["Where we are", "the start state"], ["What we can do", "action rules"], ["Planner", "searches", "hl"], ["The plan", "a checked list of actions", "ok"]])}
+<h3>2. Why a whole new chapter?</h3>
+<p>You have met two kinds of agent already, and each had a weakness:</p>
+<ul><li><b>Search agents (Chapter 3)</b> were fast, but a <i>human</i> had to invent a new heuristic for every new problem (Manhattan distance for the 8-puzzle, straight-line distance for maps).</li>
+<li><b>Logical agents (Chapter 7)</b> could reason, but needed the same rule written again for every time step and every square: thousands of nearly identical sentences.</li></ul>
+<p>Planning keeps the best of both: it writes each kind of action <b>once</b>, as a template with variables, and it describes states as lists of named facts, which lets the computer <b>invent its own heuristics</b> (you'll see how in 11.3).</p>
+<h3>3. Two worlds, all chapter long</h3>
+<div class="two">
+<div>${K.scene({ plane: "JFK", cargo: "JFK" }, "plane P2 and cargo C2 at JFK")}<p class="cap"><b>Air Cargo</b> (from the textbook). Cargo C1, C2; planes P1, P2; airports SFO and JFK. Actions: Load, Fly, Unload.</p></div>
+<div class="ngpic"><div class="rooms"><span>PreOp</span><span>OR3</span><span>Recovery</span></div><div class="toks"><i class="t m">M</i><i class="t o">O</i><i class="t p">P</i></div><p class="cap"><b>Northgate General</b> (our hospital). Patient Maria Santos, surgeon Dr. Okafor, nurse Priya, operating room OR3.</p></div>
+</div>
+<p>The same planning program solves both. Only the names of things and the action rules change. That is what <b>domain-independent</b> means.</p>
+<h3>4. The symbols you will read (Chapters 7–10)</h3>
+<p>Planning is written in logic, so here is everything you need, each with how to say it out loud:</p>
+${K.tbl ? "" : ""}<table class="sym"><thead><tr><th>Symbol</th><th>Say it as</th><th>Example</th><th>Meaning of the example</th></tr></thead><tbody>
+<tr><td>${f("¬")}</td><td>not</td><td>${f("¬At(P2, SFO)")}</td><td>plane P2 is not at SFO</td></tr>
+<tr><td>${f("∧")}</td><td>and</td><td>${f("At(C2, JFK) ∧ At(P2, JFK)")}</td><td>both are true</td></tr>
+<tr><td>${f("∨")}</td><td>or</td><td>${f("Rain ∨ Snow")}</td><td>at least one is true</td></tr>
+<tr><td>${f("⇒")}</td><td>implies, “if … then …”</td><td>${f("Fever ⇒ Test")}</td><td>whenever Fever is true, Test is true</td></tr>
+<tr><td>${f("⇔")}</td><td>if and only if</td><td>${f("Open ⇔ Unlocked")}</td><td>both true or both false</td></tr>
+<tr><td>${f("∀x")} / ${f("∃x")}</td><td>for every x / there is some x</td><td>${f("∀p Patient(p) ⇒ Chart(p)")}</td><td>every patient has a chart</td></tr>
+<tr><td>${f("At(C2, JFK)")}</td><td>“At, C2, JFK”</td><td>a <b>fact</b></td><td>cargo C2 is at JFK</td></tr>
+<tr><td>${f("{x/C2}")}</td><td>x becomes C2</td><td>a <b>substitution</b></td><td>replace every x with C2</td></tr>
+<tr><td>${f("∈")} / ${f("⊂")}</td><td>is a member of / is a subset of</td><td>${f("Maria ∈ Patients")}</td><td>Maria is one of the patients</td></tr>
+</tbody></table>
+${K.plain(`<b>Capital letters</b> are specific things or relations: ${f("C2")}, ${f("JFK")}, ${f("At")}. <b>Lower-case letters</b> are variables, blanks waiting to be filled: ${f("c")}, ${f("p")}, ${f("from")}.`)}
+${K.watch(`${f("P ⇒ Q")} does <b>not</b> mean “P causes Q”. It is only false in one situation: P true and Q false.`)}
+${K.tryit("Read this out loud and say what it means: ¬At(C2, SFO) ∧ At(P2, JFK)", "“Not At C2 SFO, and At P2 JFK”: cargo C2 is not at SFO, and plane P2 is at JFK.")}
+<h3>5. How to use this lab</h3>
+${K.flow([["Watch", "narrated video"], ["Read", "this pamphlet"], ["Step by step", "trace the algorithms"], ["Flip cards", "key terms"], ["MCQs", "with feedback"], ["Try it", "write and run plans"]])}
+${K.recap(["A plan is a sequence of actions you can check before acting.", "Planning writes each action once, with variables, and describes states as lists of facts.", "Capitals are constants; lower-case are variables; ¬ ∧ ∨ ⇒ are not / and / or / implies."])}`,
   cards: [
-    ["Action schema", "One template with variables, e.g. Fly(p, from, to), standing for every specific action."],
-    ["Factored state", "A state broken into named facts, e.g. {At(C1, SFO), At(P1, SFO)}."],
-    ["Domain-independent planner", "The same code solves any domain; only the action schemas and objects change."],
-    ["KB ⊨ α", "α is true in every model in which the KB is true."],
-    ["P ⇒ Q", "False only when P is true and Q is false."],
-    ["∀x / ∃x", "For every object x / for at least one object x."],
-    ["θ = {x/John}", "A substitution: replace every x with John."],
-    ["x ∈ C, C ⊂ D", "Membership and subcategory (Chapter 10); members of C are also members of D."]
+    ["Plan", "A sequence of actions that takes you from the start to the goal, checked before acting."],
+    ["Action schema", "One template with variables, e.g. Fly(p, from, to), standing for every specific flight."],
+    ["Factored state", "A state written as a list of named facts, e.g. {At(C2, JFK), At(P2, JFK)}."],
+    ["Domain-independent planner", "The same program solves any domain; only the objects and action rules change."],
+    ["¬  ∧  ∨", "not · and · or"],
+    ["P ⇒ Q", "If P then Q. False only when P is true and Q is false."],
+    ["∀x / ∃x", "For every x / there is at least one x."],
+    ["θ = {x/C2}", "A substitution: replace every x with C2."]
   ],
-  check: { q: "Which planning idea removes the need for a human to write a new heuristic for every problem?",
-    options: ["Atomic states", "Factored states", "Propositional axioms for each time step", "A larger search tree"], answer: 1,
-    why: "Because a factored state is made of named facts, the planner can relax the problem itself and compute heuristics automatically (section 11.3)." },
+  check: { q: "Which idea lets a planner compute its own heuristics instead of waiting for a human to write one?", options: ["Describing states as lists of named facts", "Using bigger computers", "Writing a separate rule for every time step", "Searching only backward"] },
   mcq: [
-    { q: "In the KB {Fever ∧ HighHR ⇒ SepsisRisk, Fever, HighHR}, how many of the 8 models make every KB sentence true?", options: ["0", "1", "3", "8"], answer: 1,
-      fb: ["The KB is satisfiable.", "Correct: only Fever = T, HighHR = T, SepsisRisk = T.", "Three models satisfy the rule alone; Fever and HighHR must also be true.", "That is every model, including ones where Fever is false."] },
-    { q: "When is P ⇒ Q false?", options: ["When P is false", "When Q is true", "When P is true and Q is false", "When both are false"], answer: 2,
-      fb: ["A false premise makes the implication true.", "A true conclusion makes the implication true.", "Correct: that is the only case.", "Both false gives true."] },
-    { q: "Which is a variable in the Air Cargo schema Fly(p, from, to)?", options: ["Fly", "SFO", "from", "P1"], answer: 2,
-      fb: ["Fly is the action name.", "SFO is a constant.", "Correct: lower-case names are variables.", "P1 is a constant (a specific plane)."] },
-    { q: "UNIFY(Knows(John, x), Knows(y, Ann)) = ?", options: ["{x/John, y/Ann}", "{y/John, x/Ann}", "FAILURE", "{John/y, Ann/x}"], answer: 1,
-      fb: ["The pairs are crossed.", "Correct: compare argument by argument.", "Two variables meet two constants, so unification succeeds.", "Substitutions replace variables, written variable/value."] },
-    { q: "Maria ∈ SurgicalPatients and SurgicalPatients ⊂ Patients. What follows?", options: ["Patients ⊂ Maria", "Maria ∈ Patients", "SurgicalPatients ∈ Maria", "Nothing"], answer: 1,
-      fb: ["A person is not a category.", "Correct: membership is inherited upward.", "Reversed.", "Category inheritance gives a new fact."] }
+    { q: "Which symbol means “and”?", options: ["¬", "∧", "∨", "⇒"] },
+    { q: "When is P ⇒ Q false?", options: ["When P is false", "When Q is true", "When P is true and Q is false", "When both are false"] },
+    { q: "In Fly(p, from, to), which part is a variable?", options: ["Fly", "SFO", "from", "P1"] },
+    { q: "What does ¬At(P2, SFO) say?", options: ["P2 is at SFO", "P2 is not at SFO", "SFO is not a plane", "P2 might be at SFO"] },
+    { q: "Maria ∈ SurgicalPatients and SurgicalPatients ⊂ Patients. What follows?", options: ["Patients ⊂ Maria", "Maria ∈ Patients", "SurgicalPatients ∈ Maria", "Nothing"] }
   ]
 },
+
+/* ======================================================================= */
 {
-  id: "s111", kind: "section", part: "p1", slides: [5, 21],
+  id: "s111", kind: "section", part: "p1", slides: [9, 30],
   label: "11.1", title: "Defining Classical Planning",
-  blurb: "PDDL: the initial state, action schemas, the goal, and the RESULT rule, worked through Air Cargo, the spare tire, the blocks world and Northgate.",
-  learn: `
-<h3>1. The planning question</h3>
-<p>Given where I am now, what sequence of actions gets me to my goal? The agent works out the <b>whole</b> sequence before acting, and the answer can be checked. <b>Classical planning</b> assumes the world is <b>discrete</b>, <b>deterministic</b>, <b>static</b> and <b>fully observable</b>. Section 11.5 drops the last two.</p>
-<h3>2. Three ingredients: Init, Actions, Goal</h3>
-<div class="rule"><span class="f">Init( At(C1, SFO) ∧ At(C2, JFK) ∧ At(P1, SFO) ∧ At(P2, JFK) )</span><br><span class="f">Goal( At(C1, JFK) ∧ At(C2, SFO) )</span></div>
-<p>The goal is a <b>partial</b> description: it says nothing about the planes, so any plan that gets the cargo right counts.</p>
-<h3>3. States and the closed-world assumption</h3>
-<p>A state is the set of facts true right now. Under the <b>closed-world assumption</b>, a fact that is not listed is false: if <span class="f">At(P1, JFK)</span> is missing, then <span class="f">¬At(P1, JFK)</span>. This keeps states short, like a database where a missing row means “no”.</p>
-<h3>4. Action schemas and grounding</h3>
-<div class="rule"><span class="f">Action( Load(c, p, a), PRECOND: At(c, a) ∧ At(p, a), EFFECT: ¬At(c, a) ∧ In(c, p) )</span></div>
-<p>The <b>precondition</b> must be true before the action runs. The <b>effect</b> has a <b>delete list</b> (the negative literals) and an <b>add list</b> (the positive literals). Substituting objects for variables, e.g. {c/C1, p/P1, a/SFO}, is called <b>grounding</b>.</p>
-<h3>5. The RESULT rule</h3>
-<div class="rule"><span class="f">RESULT(s, a) = (s − DEL(a)) ∪ ADD(a)</span></div>
-<div class="ex"><div class="ex-h">Worked example</div>
-s = {At(P1, SFO), At(C2, JFK)}, a = Fly(P1, SFO, JFK).<br>
-DEL(a) = {At(P1, SFO)}, ADD(a) = {At(P1, JFK)}.<br>
-s − DEL = {At(C2, JFK)}; ∪ ADD = {At(C2, JFK), At(P1, JFK)}. At(C2, JFK) was never touched; facts an action doesn't mention carry over unchanged.</div>
-<h3>6. Four domains, one structure</h3>
-<ul><li><b>Air Cargo:</b> Load, Fly, Unload. The solution has 6 steps. Cargo inside a plane is at no airport, so flying never needs to update it.</li>
-<li><b>Spare tire:</b> one Remove schema matches Init two ways. <span class="f">LeaveOvernight</span> deletes everything, so a planner must avoid it. Plan: Remove(Flat, Axle), Remove(Spare, Trunk), PutOn(Spare, Axle).</li>
-<li><b>Blocks world:</b> sometimes you must undo before you build. Move C to the table first, then B onto C, then A onto B. <span class="f">MoveToTable</span> is a separate action, because the table always has room.</li>
-<li><b>Northgate:</b> Prep, TransferToOR, Operate and TransferToRecovery have the same structure. Operate needs Dr. Okafor in the room, and checking every precondition is exactly how a planner catches a modelling gap like that.</li></ul>
-<div class="mistake"><b>Common mistake:</b> forgetting the delete list. Without <span class="f">¬At(p, from)</span>, a plane that flies to JFK would still be at SFO.</div>`,
+  blurb: "How to write a planning problem down so precisely that a computer can solve it: facts, states, Init and Goal, action schemas, and RESULT.",
+  learn: K.top("11.1", "Writing a Planning Problem Down", 18, ["describe a state as a set of facts, and explain the closed-world assumption", "read an action schema and ground it with a substitution", "decide whether an action is applicable", "compute RESULT(s, a) by striking out deletes and adding adds"]) + `
+<h3>1. The four simplifying assumptions</h3>
+<p>Classical planning starts with a simple world, the way physics starts with frictionless surfaces:</p>
+<table class="sym"><thead><tr><th>Assumption</th><th>In plain words</th><th>Everyday example that breaks it</th></tr></thead><tbody>
+<tr><td>Fully observable</td><td>we know every relevant fact at the start</td><td>you don't know if the milk has gone off</td></tr>
+<tr><td>Deterministic</td><td>each action has exactly one result</td><td>a coin flip</td></tr>
+<tr><td>Discrete steps</td><td>the world changes in separate steps</td><td>water slowly filling a bath</td></tr>
+<tr><td>Static</td><td>nothing changes while the agent thinks</td><td>a traffic light changing while you decide</td></tr></tbody></table>
+<p>Section 11.5 relaxes some of these. For now, keep the world simple.</p>
+
+<h3>2. A state is a list of true facts</h3>
+${K.fig(K.scene({ plane: "JFK", cargo: "JFK" }) + `<div class="ckrow">${K.chips(["At(C2, JFK)", "At(P2, JFK)"])}</div>`, "The picture and the facts say the same thing. The computer only ever sees the facts.")}
+<p>A <b>fact</b> (also called a fluent or ground atom) is a true sentence with no variables, like ${f("At(C2, JFK)")}. A <b>state</b> is simply the set of facts that are true right now: ${f("{ At(C2, JFK), At(P2, JFK) }")}.</p>
+${K.analogy(`<b>An attendance list.</b> If your name isn't on the list, you weren't in class. Planning uses the same rule, the <b>closed-world assumption</b>: any fact not listed is <b>false</b>. So the state above also tells us ${f("¬At(P2, SFO)")}, ${f("¬In(C2, P2)")} and ${f("¬At(C2, SFO)")} without writing them.`)}
+${K.watch(`A state never contains variables. ${f("At(c, JFK)")} is not a fact; it is a pattern.`)}
+
+<h3>3. Init and Goal</h3>
+<div class="rule">${f("Init( At(C2, JFK) ∧ At(P2, JFK) )")} &nbsp; ${f("Goal( At(C2, SFO) )")}</div>
+<p><b>Init</b> lists every fact true at the start. <b>Goal</b> lists only the facts we care about at the end. The goal above says nothing about the plane, so a final state with the plane at SFO and one with the plane back at JFK are <b>both</b> goal states. The goal is a <b>partial</b> description.</p>
+${K.tryit("Is { At(C2, SFO), At(P2, JFK) } a goal state for Goal( At(C2, SFO) )?", "Yes. It contains At(C2, SFO). Extra facts don't matter.")}
+
+<h3>4. Action schemas: one recipe, many actions</h3>
+${K.analogy(`A schema is like a <b>function definition</b> in code: ${f("Load(c, p, a)")} has three parameters. Calling it with real arguments, ${f("Load(C2, P2, JFK)")}, gives one concrete action.`)}
+<div class="anat">
+<div class="code">Action( Load(c, p, a),<br>&nbsp; PRECOND: At(c, a) ∧ At(p, a)<br>&nbsp; EFFECT: &nbsp;¬At(c, a) ∧ In(c, p) )</div>
+<div class="anat-n"><div><b>Name + parameters</b>: which cargo, which plane, which airport.</div><div><b>PRECOND</b>: what must be true <i>before</i>: cargo and plane at the same airport.</div><div><b>EFFECT</b>: what changes. Facts with ¬ form the <span class="del-t">DELETE list</span> (stop being true); the rest form the <span class="add-t">ADD list</span> (become true).</div></div>
+</div>
+<p>The three Air Cargo schemas:</p>
+<table class="sym"><thead><tr><th>Schema</th><th>Needs</th><th>Deletes</th><th>Adds</th></tr></thead><tbody>
+<tr><td>${f("Load(c, p, a)")}</td><td>At(c,a), At(p,a)</td><td>At(c,a)</td><td>In(c,p)</td></tr>
+<tr><td>${f("Fly(p, from, to)")}</td><td>At(p,from)</td><td>At(p,from)</td><td>At(p,to)</td></tr>
+<tr><td>${f("Unload(c, p, a)")}</td><td>In(c,p), At(p,a)</td><td>In(c,p)</td><td>At(c,a)</td></tr></tbody></table>
+
+<h3>5. Grounding: fill in the blanks</h3>
+${K.flow([["Load(c, p, a)", "schema"], ["{c/C2, p/P2, a/JFK}", "substitution", "hl"], ["Load(C2, P2, JFK)", "one ground action", "ok"]])}
+<p>The substitution replaces each variable <b>everywhere</b>, including the precondition, which becomes ${f("At(C2, JFK) ∧ At(P2, JFK)")}. With one cargo, one plane and two airports there are 2 Loads, 2 Unloads and 2 Flys: <b>six ground actions</b>. Real problems have thousands, which is why we write schemas.</p>
+
+<h3>6. Is an action applicable?</h3>
+<p>An action is <b>applicable</b> in state s when <b>every</b> precondition fact is in s.</p>
+<table class="sym"><thead><tr><th>Action</th><th>Needs</th><th>In the start state?</th></tr></thead><tbody>
+<tr><td>Load(C2, P2, JFK)</td><td>At(C2,JFK), At(P2,JFK)</td><td><span class="vk">✓ ✓ applicable</span></td></tr>
+<tr><td>Fly(P2, JFK, SFO)</td><td>At(P2,JFK)</td><td><span class="vk">✓ applicable</span></td></tr>
+<tr><td>Unload(C2, P2, SFO)</td><td>In(C2,P2), At(P2,SFO)</td><td><span class="vx">✗ ✗ not applicable</span></td></tr></tbody></table>
+
+<h3>7. RESULT: strike out, then add</h3>
+<div class="rule">${f("RESULT(s, a) = (s − DEL(a)) ∪ ADD(a)")} &nbsp; “take the state, remove what the action deletes, add what it adds”</div>
+<p>Run the whole plan and watch the fact cards:</p>
+<div class="steps3">
+<div>${K.scene({ plane: "JFK", cargo: "in" })}<div class="st-t">1 · Load(C2, P2, JFK)</div>${K.chips([["At(C2, JFK)", "del"], "At(P2, JFK)", ["In(C2, P2)", "add"]])}</div>
+<div>${K.scene({ plane: "SFO", cargo: "in" })}<div class="st-t">2 · Fly(P2, JFK, SFO)</div>${K.chips(["In(C2, P2)", ["At(P2, JFK)", "del"], ["At(P2, SFO)", "add"]])}</div>
+<div>${K.scene({ plane: "SFO", cargo: "SFO" })}<div class="st-t">3 · Unload(C2, P2, SFO)</div>${K.chips([["In(C2, P2)", "del"], "At(P2, SFO)", ["At(C2, SFO)", "add"]])}</div></div>
+${K.plain(`Notice step 2: Fly never mentions the cargo, yet the cargo travels. That's because ${f("In(C2, P2)")} isn't in Fly's delete list, so it simply <b>stays</b>. Facts an action doesn't mention carry over unchanged. This one rule solves Chapter 7's “frame problem” for free.`)}
+${K.tryit("s = {At(P2, JFK), At(C2, JFK)}. What is RESULT(s, Fly(P2, JFK, SFO))?", "{At(C2, JFK), At(P2, SFO)}. Fly deletes At(P2, JFK) and adds At(P2, SFO). The cargo wasn't loaded, so it stays at JFK.")}
+${K.watch(`<b>Forgetting the delete list.</b> If Fly only said “add At(p, to)”, the plane would end up at JFK <i>and</i> SFO, and the planner would happily use that impossible state. Always ask: <i>what stops being true?</i>`)}
+
+<h3>8. The same structure, other worlds</h3>
+<div class="two">
+<div><b>Spare tire.</b> Remove(Flat, Axle), Remove(Spare, Trunk), PutOn(Spare, Axle). The trap action <i>LeaveOvernight</i> is always applicable (precondition ⊤ = always true) but deletes every tire location: <b>applicable does not mean useful</b>.</div>
+<div><b>Blocks world.</b> C sits on A, goal: A on B on C. You must first move C to the table, a step that achieves no goal fact directly but makes the others possible.
+${K.tree(320, 150, { la: [80, 14, "start", "", "rep", 90], a: [55, 122, "A", "", "", 50], c: [55, 84, "C", "", "bad", 50], b: [115, 122, "B", "", "", 50], lg: [255, 14, "goal", "", "rep", 90], gC: [255, 122, "C", "", "", 50], gB: [255, 84, "B", "", "", 50], gA: [255, 46, "A", "", "ok", 50] }, [], 50, 36)}</div></div>
+${K.ng(`Rooms instead of airports, a patient instead of cargo: Prep, TransferToOR, Operate, TransferToRecovery. When we ran a planner on our first model it reported <b>no plan</b>. Why? Operate needs the surgeon in the room, and no action ever moved Dr. Okafor. Adding a <b>ScrubIn(s, o)</b> schema fixed it. A planner that checks every precondition is also a great <b>bug finder</b> for your model.`)}
+${K.recap(["A state is a set of true facts; anything unlisted is false.", "A schema has PRECOND (needed first) and EFFECT (DELETE list ¬… and ADD list).", "Applicable = every precondition is in the state.", "RESULT(s, a) = (s − DEL) ∪ ADD; untouched facts carry over."])}`,
   cards: [
-    ["Classical planning assumptions", "Discrete, deterministic, static, fully observable."],
-    ["PDDL", "Planning Domain Definition Language: one schema describes a whole family of actions."],
-    ["Init / Goal", "The facts true at the start / the facts that must be true at the end (a partial description)."],
-    ["Closed-world assumption", "A fact not listed in the state is false."],
-    ["Precondition", "What must be true before an action can run."],
-    ["Add list / delete list", "The positive / negated literals of an action's effect."],
-    ["Grounding", "Substituting objects for variables to get a concrete action."],
-    ["RESULT(s, a)", "(s − DEL(a)) ∪ ADD(a); unmentioned facts are unchanged."],
-    ["Why MoveToTable?", "The table always has room, so Clear(Table) must never be switched off."]
+    ["State", "The set of facts true right now, e.g. {At(C2, JFK), At(P2, JFK)}."],
+    ["Closed-world assumption", "Any fact not listed in the state is false (like an attendance list)."],
+    ["Goal (partial)", "Lists only the facts we care about; any state containing them is a goal state."],
+    ["PRECOND", "Facts that must be true before the action can run."],
+    ["DELETE list", "The ¬ facts in the EFFECT: they stop being true."],
+    ["ADD list", "The positive facts in the EFFECT: they become true."],
+    ["Grounding", "Replacing every variable with an object, e.g. {c/C2, p/P2, a/JFK}."],
+    ["Applicable", "Every precondition of the action is in the current state."],
+    ["RESULT(s, a)", "(s − DEL(a)) ∪ ADD(a): strike out the deletes, then add the adds."],
+    ["Frame problem (solved)", "Facts an action doesn't mention simply carry over."]
   ],
-  check: { q: "s = {At(P1, SFO), At(C2, JFK)}. What is RESULT(s, Fly(P1, SFO, JFK))?",
-    options: ["{At(P1, JFK)}", "{At(C2, JFK), At(P1, JFK)}", "{At(P1, SFO), At(P1, JFK), At(C2, JFK)}", "{At(C2, JFK)}"], answer: 1,
-    why: "Remove the delete list At(P1, SFO), add At(P1, JFK); At(C2, JFK) carries over. A forgets the untouched fact; C forgets the delete; D forgets the add." },
+  check: { q: "s = {At(P1, SFO), At(C2, JFK)}. What is RESULT(s, Fly(P1, SFO, JFK))?", options: ["{At(P1, JFK), At(C2, JFK)}", "{At(P1, SFO), At(P1, JFK), At(C2, JFK)}", "{At(P1, JFK)}", "{At(P1, SFO), At(C2, JFK)}"] },
   mcq: [
-    { q: "Under the closed-world assumption, At(P1, JFK) is missing from the state. Therefore…", options: ["At(P1, JFK) is unknown", "¬At(P1, JFK)", "The state is invalid", "P1 is in the air"], answer: 1,
-      fb: ["“Unknown” is the belief-state view of section 11.5.", "Correct: unlisted means false.", "Missing facts are normal; states list only true facts.", "Nothing in the state says P1 is in the air."] },
-    { q: "Which literal is in the DELETE list of Load(c, p, a)?", options: ["In(c, p)", "At(p, a)", "¬At(c, a)", "Cargo(c)"], answer: 2,
-      fb: ["That is added.", "The plane stays where it is.", "Correct: the cargo is no longer at the airport.", "Types never change."] },
-    { q: "Why is the Air Cargo goal At(C1, JFK) ∧ At(C2, SFO) a partial description?", options: ["It is missing Init", "It says nothing about the planes", "It uses variables", "It has no ∨"], answer: 1,
-      fb: ["The goal is separate from Init.", "Correct: any final plane position is acceptable.", "It is ground.", "Goals are conjunctions."] },
-    { q: "Grounding Load(c, p, a) with {c/C1, p/P1, a/SFO} gives…", options: ["Load(C1, P1, SFO) with PRECOND At(C1, SFO) ∧ At(P1, SFO)", "Load(c, p, a) with SFO added", "A new schema", "Load(SFO, P1, C1)"], answer: 0,
-      fb: ["Correct: every variable is replaced everywhere.", "Grounding replaces variables; it does not add them.", "It produces one concrete action.", "The order of the substitution matters."] },
-    { q: "In the blocks world, why must C move to the table first?", options: ["C is heaviest", "A is not clear while C sits on it", "Move cannot use B", "The goal mentions C on the table"], answer: 1,
-      fb: ["Weight is not modelled.", "Correct: you must undo before you build.", "B moves in step 2.", "The goal is A on B and B on C."] }
+    { q: "Under the closed-world assumption, the state {At(C2, JFK)} says what about At(C2, SFO)?", options: ["It is true", "It is false", "It is unknown", "It is a variable"] },
+    { q: "Which part of Load's EFFECT is the DELETE list?", options: ["In(c, p)", "¬At(c, a)", "At(p, a)", "At(c, a) ∧ At(p, a)"] },
+    { q: "Start state {At(C2, JFK), At(P2, JFK)}. Which action is NOT applicable?", options: ["Load(C2, P2, JFK)", "Fly(P2, JFK, SFO)", "Unload(C2, P2, SFO)", "All are applicable"] },
+    { q: "Why does the cargo travel when the plane flies, even though Fly never mentions cargo?", options: ["Fly secretly adds In(c, p)", "In(C2, P2) isn't deleted, so it carries over", "The goal moves it", "It doesn't travel"] },
+    { q: "Ground Load(c, p, a) with {c/C1, p/P1, a/SFO}. Its precondition becomes…", options: ["At(c, a) ∧ At(p, a)", "At(C1, SFO) ∧ At(P1, SFO)", "In(C1, P1)", "At(C1, P1)"] },
+    { q: "LeaveOvernight has precondition ⊤ and deletes every tire location. What does it teach?", options: ["Every applicable action helps", "Applicable does not mean useful", "Preconditions are optional", "Goals must be complete"] }
   ]
 },
+
+/* ======================================================================= */
 {
-  id: "s112", kind: "section", part: "p1", slides: [22, 32],
+  id: "s112", kind: "section", part: "p1", slides: [31, 57],
   label: "11.2", title: "Algorithms for Classical Planning",
-  blurb: "Forward (progression) search, backward (regression) search, planning as satisfiability, other encodings, and partial-order plans.",
-  learn: `
-<h3>1. Three ways to search</h3>
-<p>Because PDDL <i>describes</i> the problem rather than prescribing a method, we can search in different directions:</p>
-<ul><li><b>Forward search (progression)</b>: start at Init and apply applicable actions until a state satisfies the goal.</li>
-<li><b>Backward search (regression)</b>: start at the goal and ask what must have been true one step earlier.</li>
-<li><b>SAT planning</b>: ask a satisfiability solver whether a plan of exactly k steps exists.</li></ul>
-<h3>2. Forward search and the branching problem</h3>
-<p>An action is <b>applicable</b> when its preconditions are true in the current state. Forward search is ordinary Chapter 3 search over states made of facts. Its weakness is branching: in a large Air Cargo problem (10 airports, 50 planes, 200 cargo) there are about 2,000 applicable actions per state. A 41-step solution then means about <span class="f">2000⁴¹</span> nodes for blind search. A good heuristic is essential (section 11.3).</p>
-<h3>3. Backward search (regression)</h3>
-<p>Pick a <b>relevant</b> action: one that achieves a goal literal without undoing any other goal literal. Then regress:</p>
-<div class="rule"><span class="f">g′ = (g − ADD(a)) ∪ PRECOND(a)</span></div>
-<div class="ex"><div class="ex-h">Worked example</div>
-Goal g = {At(C2, SFO)}. Relevant action: Unload(C2, p, SFO), which adds At(C2, SFO).<br>
-g′ = ({At(C2, SFO)} − {At(C2, SFO)}) ∪ {In(C2, p), At(p, SFO)} = {In(C2, p), At(p, SFO)}. The plane p is still a variable.</div>
-<p>Regression considers far fewer actions, but its states contain variables, which makes heuristics harder. Most modern planners search forward.</p>
-<h3>4. Planning as satisfiability</h3>
-<p>Fix a length k. Create a true/false variable for every fact at every time step and every action at every step. Then add clauses:</p>
-<ul><li><b>Preconditions:</b> <span class="f">Load(C1, P1, SFO)ᵗ ⇒ At(C1, SFO)ᵗ⁻¹</span></li>
-<li><b>Effects:</b> <span class="f">Load(C1, P1, SFO)ᵗ ⇒ In(C1, P1)ᵗ ∧ ¬At(C1, SFO)ᵗ</span></li>
-<li><b>Frame axioms</b>, which say what does not change, and <b>one action per step</b>.</li></ul>
-<p>If the formula is satisfiable, the true action variables are the plan. If it is unsatisfiable, increase k by one and try again.</p>
-<h3>5. Other approaches and partial-order plans</h3>
-<p><b>Graphplan</b> builds a planning graph; <b>situation calculus</b> writes planning in first-order logic; a <b>CSP encoding</b> makes each time step a variable whose values are actions. A <b>partial-order plan</b> leaves actions unordered when their order does not matter. For the spare tire, the two Removes can happen in either order. Such plans are still popular where people must read and check them, as in Mars rover operations.</p>
-<div class="mistake"><b>Common mistake:</b> treating “relevant” as “applicable”. Applicable looks at the <i>current state</i> (forward); relevant looks at the <i>goal</i> (backward).</div>`,
+  blurb: "Three ways to find the plan: search forward from the start, search backward from the goal, or translate everything into one big SAT problem. Plus planning graphs and partial-order plans.",
+  learn: K.top("11.2", "How a Computer Finds the Plan", 20, ["draw the search tree for a small planning problem", "explain the frontier and reached set in breadth-first search", "regress a goal through an action and decide which actions are relevant", "explain how a SAT planner turns a plan into true/false variables"]) + `
+<h3>1. Planning is search through a tree of states</h3>
+<p>Picture every state as a box and every action as an arrow. Starting from Init, the arrows fan out into a <b>search tree</b>. Somewhere in that tree is a state containing the goal facts; the arrows on the path to it are the plan.</p>
+${K.fig(K.tree(640, 320, {
+  s0: [320, 30, "S0 start", "C2@JFK · P2@JFK", "", 150],
+  s1: [160, 120, "S1", "C2 in P2 · P2@JFK", "", 150], s2: [480, 120, "S2", "C2@JFK · P2@SFO", "", 150],
+  s3: [160, 205, "S3", "C2 in P2 · P2@SFO", "", 150], r: [480, 205, "back to S0", "repeat", "rep", 150],
+  s4: [160, 290, "S4 goal", "C2@SFO · P2@SFO", "ok", 150] }, [["s0", "s1", "Load"], ["s0", "s2", "Fly"], ["s1", "s3", "Fly"], ["s2", "r", "Fly back", "rep"], ["s3", "s4", "Unload"]], 150, 44),
+  "The whole search space of the one-cargo problem. (C2@JFK is short for At(C2, JFK).)")}
+${K.analogy(`<b>A maze.</b> You can explore from the <b>entrance</b> (forward search), from the <b>exit</b> back toward the entrance (backward search), or write down the rules of the maze as a giant logic puzzle and let a puzzle-solver do it (SAT planning). This section covers all three.`)}
+
+<h3>2. Forward search, one level at a time</h3>
+<p><b>Breadth-first search</b> explores the tree level by level. It keeps two lists:</p>
+<ul><li><b>Frontier</b>: states found but not yet expanded. A first-in, first-out waiting line.</li>
+<li><b>Reached</b>: every state ever seen, so a repeated state is skipped instead of expanded again.</li></ul>
+<p>Each round: take the first state out of the line, find every applicable action, compute each child with RESULT, test each child for the goal, and put new children at the back of the line.</p>
+${K.flow([["Take", "the first state from the frontier"], ["Expand", "every applicable action"], ["Test", "is a child the goal?", "hl"], ["Queue", "new children join the back"]])}
+<p>On the one-cargo problem breadth-first search expands S0, S1, <b>S2</b>, S3 and then finds S4. S2 (the plane flown empty to SFO) was wasted work: blind search has no idea which direction is promising. The <b>Step by step</b> tab walks through every expansion.</p>
+<h3>3. Why blind forward search is hopeless on real problems</h3>
+<table class="sym"><thead><tr><th>Branching factor b</th><th>Depth d</th><th>Leaves ≈ bᵈ</th></tr></thead><tbody>
+<tr><td>2 (our toy)</td><td>3</td><td>8</td></tr><tr><td>4 (two-cargo swap)</td><td>6</td><td>4,096</td></tr>
+<tr><td>2,000 (10 airports, 50 planes, 200 cargos)</td><td>41</td><td>≈ 10¹³⁵ — more than atoms in the universe</td></tr></tbody></table>
+${K.plain(`Every level multiplies the work by the branching factor. Forward search only works with a <b>heuristic</b> that says which branch to try first. That is section 11.3.`)}
+
+<h3>4. Backward search: “what could the last step have been?”</h3>
+<p>Backward search starts from the goal. Instead of states, its nodes are <b>goal cards</b>: sets of facts that must be true. It asks which action could have come <b>last</b>, and only considers <b>relevant</b> actions:</p>
+<div class="rule"><b>Relevant</b>: the action adds at least one goal fact <b>and</b> deletes none. &nbsp; <b>Regression</b>: ${f("g′ = (g − ADD(a)) ∪ PRECOND(a)")}</div>
+${K.flow([["g₀", "At(C2,SFO)", "ok"], ["g₁", "In(C2,P2) · At(P2,SFO)"], ["g₂", "In(C2,P2) · At(P2,JFK)"], ["g₃ ⊆ Init ✓", "At(C2,JFK) · At(P2,JFK)", "ok"]])}
+<p>Through Unload, then Fly, then Load. The plan is found last step first, so you read it bottom-up: Load, Fly, Unload.</p>
+${K.analogy(`<b>Working backward from a deadline.</b> “To be at the airport at 5, I must leave home by 4. To leave by 4, I must be packed by 3:30.” Each step asks what must be true <i>just before</i>.`)}
+${K.watch(`Relevant is not just “adds a goal fact”. Flying P2 out of SFO adds At(P2, JFK), but it <b>deletes</b> At(P2, SFO), which is on the goal card. It would destroy the goal, so it is rejected.`)}
+${K.tryit("Goal card: In(C2, P2). Regress it through Load(C2, P2, JFK). What is the new goal card?", "{At(C2, JFK), At(P2, JFK)}: drop In(C2, P2) (Load achieves it), add Load's preconditions. Init satisfies it.")}
+
+<h3>5. Planning as SAT: turn the plan into a logic puzzle</h3>
+<p>Guess a length <b>k</b>. Make a true/false variable for every action at every time step (Load⁰, Fly¹, …) and every fact at every time step. Then write four kinds of rules:</p>
+<table class="sym"><thead><tr><th>Rule</th><th>Example</th><th>Plain English</th></tr></thead><tbody>
+<tr><td>Init and goal</td><td>${f("At(C2,JFK)⁰ ∧ At(C2,SFO)³")}</td><td>start facts at time 0, goal at time k</td></tr>
+<tr><td>Action rules</td><td>${f("Fly¹ ⇒ At(P2,JFK)¹ ∧ At(P2,SFO)²")}</td><td>an action needs its preconditions now, causes its effects next</td></tr>
+<tr><td>Frame axioms</td><td>${f("At(P2,SFO)² ⇔ Fly¹ ∨ (At(P2,SFO)¹ ∧ ¬FlyAway¹)")}</td><td>a fact changes only if an action changes it</td></tr>
+<tr><td>Exclusion</td><td>${f("¬(Load⁰ ∧ Fly⁰)")}</td><td>clashing actions can't share a time step</td></tr></tbody></table>
+<p>A SAT solver (DPLL from Chapter 7) either finds values for every variable (the true action cells <b>are</b> the plan) or says <b>unsatisfiable</b>: no plan of length k, try k + 1. For our problem k = 1 and 2 fail and k = 3 succeeds, so the first success is a shortest plan.</p>
+
+<h3>6. Graphplan: what <i>might</i> be true at each level</h3>
+<p>A <b>planning graph</b> alternates fact levels (S0, S1, …) and action levels (A0, A1, …). Facts are never removed from a level; new ones pile up. It also records <b>mutexes</b>: pairs that can't both happen at that level (Load and Fly at the same time; the plane at two airports). The first level where all goal facts appear with no mutex between them is a <b>lower bound</b> on the plan length. Here that is level 3, the true length.</p>
+
+<h3>7. Partial-order plans</h3>
+${K.fig(K.tree(420, 200, { s: [210, 24, "Start", "", "", 90], r1: [100, 100, "Remove(Flat, Axle)", "", "", 170], r2: [320, 100, "Remove(Spare, Trunk)", "", "", 170], p: [210, 176, "PutOn(Spare, Axle)", "", "ok", 170] }, [["s", "r1"], ["s", "r2"], ["r1", "p", "axle free"], ["r2", "p", "spare out"]], 120, 40), "Arrows mean “must come before”. The two Remove steps have no arrow between them, so either can go first.")}
+<p>Only the orderings that matter are fixed. This is how people plan projects: “these two jobs can happen in any order, but both before the next one.”</p>
+<table class="sym"><thead><tr><th></th><th>Forward</th><th>Backward</th><th>SAT</th></tr></thead><tbody>
+<tr><td>Starts from</td><td>Init</td><td>Goal</td><td>a guessed length k</td></tr><tr><td>Considers</td><td>applicable actions</td><td>relevant actions</td><td>all actions at all times</td></tr>
+<tr><td>Strength</td><td>simple; great with a heuristic</td><td>ignores irrelevant actions</td><td>reuses fast SAT solvers</td></tr></tbody></table>
+${K.recap(["Forward search applies applicable actions from Init; BFS uses a FIFO frontier and a reached set.", "Backward search regresses goal cards through relevant actions: g′ = (g − ADD) ∪ PRECOND.", "SAT planning: variables per time step, four rule types, try k = 1, 2, 3, …", "Planning graphs give a lower bound; partial-order plans keep only necessary orderings."])}`,
   cards: [
-    ["Progression", "Forward search from Init, applying applicable actions."],
-    ["Applicable action", "An action whose preconditions are true in the current state."],
-    ["Regression", "Backward search from the goal: g′ = (g − ADD(a)) ∪ PRECOND(a)."],
-    ["Relevant action", "Achieves a goal literal and undoes none of the others."],
-    ["Branching problem", "Thousands of applicable actions per state make blind forward search hopeless."],
-    ["SATPlan", "Encode “is there a plan of k steps?” as clauses; if UNSAT, try k + 1."],
-    ["Frame axiom", "A clause saying a fact stays the same unless an action changes it."],
-    ["Partial-order plan", "Leaves actions unordered when their order doesn't matter: a graph, not a sequence."]
+    ["Forward (progression) search", "Start at Init; apply applicable actions; stop at a state containing the goal."],
+    ["Frontier (BFS)", "A first-in, first-out waiting line of states found but not yet expanded."],
+    ["Reached set", "Every state seen so far; repeats are skipped."],
+    ["Branching factor", "How many actions apply per state. bᵈ nodes at depth d."],
+    ["Goal card (backward search)", "A set of facts that must be true; the nodes of backward search."],
+    ["Relevant action", "Adds at least one goal fact and deletes none."],
+    ["Regression", "g′ = (g − ADD(a)) ∪ PRECOND(a): what must be true just before a."],
+    ["SATPlan", "Encode 'a plan of k steps exists' as clauses; if UNSAT, try k + 1."],
+    ["Frame axiom", "A fact changes only if an action changes it."],
+    ["Mutex", "Two actions or facts that can't both happen at the same level."],
+    ["Partial-order plan", "Only the necessary 'before' orderings are fixed."]
   ],
-  check: { q: "Regress the goal {At(C2, SFO)} through Unload(C2, p, SFO). The new goal is…",
-    options: ["{At(C2, SFO)}", "{In(C2, p), At(p, SFO)}", "{At(C2, JFK)}", "{In(C2, p)}"], answer: 1,
-    why: "Remove what the action adds and add what it needs: both preconditions of Unload. D forgets that the plane must be at SFO." },
+  check: { q: "Regress the goal {At(C2, SFO)} through Unload(C2, p, SFO). The new goal is…", options: ["{At(C2, SFO)}", "{In(C2, p), At(p, SFO)}", "{At(C2, JFK)}", "{In(C2, p)}"] },
   mcq: [
-    { q: "Why do most modern planners search forward rather than backward?", options: ["Backward search is incomplete", "Backward states contain variables, which makes heuristics harder", "Forward search has fewer choices", "Regression cannot use PDDL"], answer: 1,
-      fb: ["Regression is complete.", "Correct.", "Forward search usually has more choices.", "Regression works directly on PDDL."] },
-    { q: "In SAT planning, the solver says UNSATISFIABLE for k = 4. What next?", options: ["No plan exists", "Try k = 5", "Remove frame axioms", "Try k = 3"], answer: 1,
-      fb: ["Only no plan of exactly 4 steps.", "Correct: increase k and ask again.", "Without frame axioms facts could change at random.", "Shorter plans were already ruled out."] },
-    { q: "What does the clause Load(C1, P1, SFO)ᵗ ⇒ At(C1, SFO)ᵗ⁻¹ encode?", options: ["An effect", "A precondition", "A frame axiom", "The goal"], answer: 1,
-      fb: ["Effects point forward in time.", "Correct: the fact must hold before the action.", "Frame axioms say facts persist.", "The goal refers to the last step."] },
-    { q: "Roughly how many nodes does blind forward search face for a 41-step plan with 2,000 actions per state?", options: ["41 × 2,000", "2,000²", "2,000⁴¹", "41²⁰⁰⁰"], answer: 2,
-      fb: ["That ignores branching at every level.", "Only two levels deep.", "Correct: b to the d.", "Reversed exponent."] },
-    { q: "In the spare tire plan, which pair can be left unordered in a partial-order plan?", options: ["Remove(Flat, Axle) and PutOn(Spare, Axle)", "Remove(Spare, Trunk) and PutOn(Spare, Axle)", "Remove(Flat, Axle) and Remove(Spare, Trunk)", "None of them"], answer: 2,
-      fb: ["The axle must be free first.", "The spare must be on the ground first.", "Correct: neither affects the other.", "One pair is independent."] }
+    { q: "BFS frontier is [S2, S3]. Which state is expanded next?", options: ["S3, because it is newer", "S2, because it joined first", "Whichever is closer to the goal", "Both at once"] },
+    { q: "During BFS, expanding S1 produces S0 again. What happens?", options: ["S0 is expanded again", "S0 is skipped because it is in Reached", "The search fails", "S0 becomes the goal"] },
+    { q: "Goal card {In(C2, P2), At(P2, SFO)}. Is Fly(P2, SFO, JFK) relevant?", options: ["Yes, it adds At(P2, JFK)", "No, it deletes At(P2, SFO), a goal fact", "Yes, every Fly is relevant", "No, Fly is never relevant"] },
+    { q: "In SAT planning the solver says UNSATISFIABLE for k = 2. What does that mean?", options: ["No plan exists at all", "No plan of length 2 exists; try k = 3", "The frame axioms are wrong", "The goal is already true"] },
+    { q: "Why are Load⁰ and Fly⁰ not allowed to be true together?", options: ["Fly deletes At(P2, JFK), which Load needs", "Load deletes At(P2, JFK)", "They have the same name", "The goal forbids it"] },
+    { q: "Roughly how many nodes does blind forward search face with 2,000 actions per state and a 41-step plan?", options: ["41 × 2,000", "2,000²", "2,000⁴¹", "41²⁰⁰⁰"] },
+    { q: "In the spare tire plan, which pair can be left unordered?", options: ["Remove(Flat, Axle) and PutOn(Spare, Axle)", "Remove(Spare, Trunk) and PutOn(Spare, Axle)", "Remove(Flat, Axle) and Remove(Spare, Trunk)", "None"] }
   ]
 },
+
+/* ======================================================================= */
 {
-  id: "s113", kind: "section", part: "p1", slides: [33, 45],
+  id: "s113", kind: "section", part: "p1", slides: [58, 79],
   label: "11.3", title: "Heuristics for Planning",
-  blurb: "Relax the problem, solve the easier version, use its cost: ignore preconditions, set cover, ignore delete lists, symmetry, serializable subgoals, preferred actions, abstraction and decomposition.",
-  learn: `
-<h3>1. Admissibility</h3>
-<p>A heuristic h(s) estimates how many actions remain. It is <b>admissible</b> if it never overestimates: <span class="f">h(s) ≤ h*(s)</span>. With an admissible heuristic, A* finds an optimal plan. The recipe for every heuristic in this section: <b>relax</b> the problem, solve the easier version, and use its cost.</p>
-<h3>2. Ignore preconditions</h3>
-<p>Delete every precondition; any action can happen at any time. At the start of Air Cargo two goal facts are missing, and two Unloads achieve them directly, so h = 2 while the true cost is 6. It is admissible but loose, like the misplaced-tiles heuristic for the 8-puzzle.</p>
-<h3>3. Set cover</h3>
-<p>Keep only each action's effects that are goal facts, then find the fewest actions that cover every goal fact. Set cover counts <b>actions</b>, not facts: one action can produce two goal facts. The exact minimum is NP-hard; a greedy cover is fast but can lose admissibility.</p>
-<h3>4. Ignore delete lists (h_FF)</h3>
-<p>Pretend actions only add facts; the “− DEL(a)” in RESULT is dropped. Facts pile up instead of competing, there are no dead ends, and hill-climbing finds a <b>relaxed plan</b> quickly. Its length is the heuristic behind <b>FF (Fast Forward)</b>. Because preconditions are kept, the relaxed plan still does the real work of making actions legal, so the estimate is much closer than ignoring preconditions.</p>
-<div class="ex"><div class="ex-h">Air Cargo at Init</div>
-Ignore preconditions: h = 2 · ignore delete lists: h = 6 · true cost h* = 6.</div>
-<h3>5. Pruning ideas</h3>
-<ul><li><b>Symmetry reduction:</b> twelve identical blocks give 110 equivalent first moves; keep one.</li>
-<li><b>Serializable subgoals:</b> an order exists in which no finished subgoal is undone, e.g. building a tower bottom-up. It let Remote Agent avoid almost all backtracking.</li>
-<li><b>Preferred actions:</b> search actions from a relaxed plan first (forward pruning). This is fast but can miss the optimum.</li></ul>
-<h3>6. Abstraction and decomposition</h3>
-<p><b>Abstraction</b> maps many states onto one, e.g. ignore fuel. Its cost never exceeds the real cost, so it is admissible. <b>Decomposition</b> solves subgoals separately and combines their costs:</p>
-<div class="rule"><span class="f">MAX(3, 5, 4) = 5</span> always admissible · <span class="f">SUM = 12</span> often closer, but can double-count shared work (one flight delivering three packages)</div>
-<div class="ng"><div class="ng-h">Northgate</div>The same relaxation code reads Northgate's schemas. Ignoring delete lists lets Maria be in PreOp and OR3 at once: absurd, but fine for an estimate. Ignoring preconditions lets SurgeryComplete happen in one step, which is far too optimistic.</div>
-<div class="mistake"><b>Common mistake:</b> assuming a more informed heuristic is always admissible. h_add (SUM) can overestimate when subgoals share actions.</div>`,
+  blurb: "How a planner invents its own estimate of 'how far to the goal': relax the problem, solve the easy version, and use its length. Goal count, ignore preconditions, ignore deletes, h_max / h_add, and A*.",
+  learn: K.top("11.3", "Guessing the Distance to the Goal", 20, ["explain h, h* and admissible with a number line", "compute goal count, ignore-preconditions, h_FF, h_max and h_add for a small state", "run A* by hand using f = g + h", "explain why a more informed heuristic expands fewer states"]) + `
+<h3>1. A heuristic is a GPS estimate</h3>
+${K.analogy(`Your GPS says “about 20 minutes”. It doesn't know the exact traffic, but the estimate tells you which road to try first. A planning heuristic ${f("h(s)")} estimates <b>how many actions are left</b> from state s. The true number is ${f("h*(s)")}.`)}
+${K.fig(`<div class="nline"><div class="nl-ax">${[0, 1, 2, 3, 4, 5].map((i) => `<span style="left:${i * 20}%">${i}</span>`).join("")}</div>
+<div class="nl-pt g" style="left:20%">goal count = 1</div><div class="nl-pt t" style="left:60%">h* = 3 (truth)</div><div class="nl-pt b" style="left:80%">bad guess = 4</div></div>`, "One-cargo start state. Estimates at or left of the truth are admissible; anything to the right overestimates.")}
+<div class="rule"><b>Admissible:</b> never overestimates, ${f("h(s) ≤ h*(s)")}. With an admissible heuristic, A* is guaranteed to return a <b>shortest</b> plan.</div>
+<h3>2. Where do estimates come from? Relax the problem</h3>
+<p>The trick: <b>remove some rules</b> to get an easier problem, solve the easy problem exactly, and use its plan length as the estimate. Removing rules can only make plans shorter or equal, so the estimate is optimistic.</p>
+${K.analogy(`Straight-line distance on a map is a relaxation: you pretend you can walk through buildings. Because planning problems are written as facts and schemas, the computer can relax <b>any</b> problem by itself. This is the big payoff of 11.1's representation.`)}
+<h3>3. The simplest: goal count</h3>
+<p>Count the goal facts that are still false. Admissible (each needs at least one action) but weak: in the one-cargo tree, S1 (2 steps away) and S2 (4 steps away) both score 1, so it can't tell them apart.</p>
+<h3>4. Relaxation 1: ignore preconditions</h3>
+<p>Pretend every action can run at any time. Then you only need enough actions to <b>add</b> every missing goal fact. Choosing the fewest is the <b>set cover</b> problem:</p>
+${K.fig(`<div class="vcover"><span class="vg">A</span><span class="vg">B</span><span class="vg">C</span><div class="vs s1">a₁ adds A, B</div><div class="vs s2">a₂ adds B, C</div><div class="vs s3">a₃ adds A</div></div>`, "Goal A ∧ B ∧ C. The fewest actions covering all three: a₁ + a₂, so h = 2.")}
+<p>On the two-cargo swap: two goal facts, each added by one Unload, no Unload adds both, so <b>h = 2</b>, while the truth is 6. It forgets that cargo must be loaded and flown first.</p>
+<h3>5. Relaxation 2: ignore delete lists (h_FF)</h3>
+<p>Keep the preconditions but throw away the delete lists: <b>facts only pile up</b>. Then:</p>
+<ol><li><b>Grow layers</b>: from the state's facts, apply every applicable action and add what it adds, until the goal appears.</li>
+<li><b>Extract a relaxed plan</b>: work back from the goal, picking an action for each needed fact, and count the actions.</li></ol>
+${K.fig(`<div class="gp"><div class="gp-col"><div class="gp-h">layer 0</div><div class="gp-i">C2@JFK</div><div class="gp-i">P2@JFK</div></div><div class="gp-arr">→</div><div class="gp-col"><div class="gp-h">layer 1</div><div class="gp-i">C2@JFK</div><div class="gp-i">P2@JFK</div><div class="gp-i new">C2 in P2</div><div class="gp-i new">P2@SFO</div></div><div class="gp-arr">→</div><div class="gp-col"><div class="gp-h">layer 2</div><div class="gp-i">…</div><div class="gp-i goal">C2@SFO</div></div></div>`, "Relaxed layers from S0. Relaxed plan = {Load, Fly, Unload}, so h_FF = 3.")}
+<p>Because preconditions are kept, the order Load → Fly → Unload is still forced, which is why h_FF is usually close to the truth. It is the heuristic of the <b>FF</b> planner. It is not guaranteed admissible, but it is very well informed.</p>
+${K.watch(`“Ignore deletes” does <b>not</b> ignore preconditions. Only the delete lists go.`)}
+<h3>6. Combining goals: MAX or SUM (h_max, h_add)</h3>
+<p>Give every fact a cost: facts true now cost 0; a fact made by an action costs ${f("1 + combine(costs of its preconditions)")}. h_max combines with <b>max</b>, h_add with <b>sum</b>.</p>
+<table class="sym"><thead><tr><th>Fact (from S0)</th><th>Made by</th><th>MAX</th><th>SUM</th></tr></thead><tbody>
+<tr><td>C2 in P2</td><td>Load: 1 + (0, 0)</td><td>1</td><td>1</td></tr><tr><td>P2@SFO</td><td>Fly: 1 + (0)</td><td>1</td><td>1</td></tr>
+<tr><td><b>C2@SFO</b></td><td>Unload: 1 + (1, 1)</td><td><b>2</b></td><td><b>3</b></td></tr></tbody></table>
+${K.plain(`h_max never overestimates. h_add is better informed but can <b>double-count</b>: with two cargos sharing one flight to SFO, h_add = 3 + 3 = 6, but the real plan is 5 actions, because one Fly serves both.`)}
+<h3>7. Putting it to work: A*</h3>
+<div class="rule">${f("f(n) = g(n) + h(n)")}: actions taken so far + estimated actions left. Always expand the lowest f.</div>
+<table class="sym"><thead><tr><th>Heuristic used by A*</th><th>States expanded (one-cargo)</th></tr></thead><tbody>
+<tr><td>none (breadth-first)</td><td>4: S0, S1, S2, S3</td></tr><tr><td>goal count</td><td>4: ties at f = 2 let S2 in</td></tr><tr><td>h_FF</td><td><b>3</b>: S2 (f = 4) is never expanded</td></tr></tbody></table>
+<p>The difference is one state here, and astronomically many on real problems. The <b>Step by step</b> tab traces all of these.</p>
+<h3>8. More tricks real planners use</h3>
+<ul><li><b>Symmetry reduction</b>: two identical planes in the same place give mirror-image branches; explore one.</li>
+<li><b>Abstraction</b>: ignore some details (which cargo is which) to merge states; the abstract cost is a lower bound.</li>
+<li><b>Serializable subgoals</b>: some goals can be achieved one at a time without undoing earlier ones (build a tower bottom-up).</li>
+<li><b>Preferred actions</b>: try the first actions of the relaxed plan first. Fast, but may miss the best plan.</li></ul>
+${K.ng(`Goal: Maria in recovery and her surgery complete. Goal count = 2. Ignore-deletes = 5 (Prep, ScrubIn, TransferToOR, Operate, TransferToRecovery), which is exactly the true cost.`)}
+${K.recap(["h(s) estimates actions left; admissible means h ≤ h*.", "Relax the problem, solve it exactly, use its length.", "Ignore preconditions → set cover (weak); ignore deletes → h_FF (strong).", "h_max is admissible; h_add can double-count shared actions.", "A* expands the lowest f = g + h; a better h means fewer expansions."])}`,
   cards: [
-    ["Admissible heuristic", "Never overestimates: h(s) ≤ h*(s). A* with it finds an optimal plan."],
-    ["Relaxation", "Remove a restriction, solve the easier problem, use its cost as h."],
-    ["Ignore preconditions", "Any action any time; admissible but loose (Air Cargo: h = 2 vs 6)."],
-    ["Set cover", "Fewest actions covering all goal facts; counts actions, not facts."],
-    ["Ignore delete lists", "Actions only add facts; the basis of FF. Much closer estimates."],
-    ["Symmetry reduction", "Prune moves that lead to equivalent states."],
-    ["Serializable subgoals", "An order exists in which completed subgoals are never undone."],
-    ["Preferred actions", "Try actions from a relaxed plan first; fast, but can miss the optimum."],
-    ["MAX vs SUM", "MAX of subgoal costs is admissible; SUM is closer but can overestimate."]
+    ["h(s) and h*(s)", "The estimated and the true number of actions from s to the goal."],
+    ["Admissible heuristic", "Never overestimates: h(s) ≤ h*(s). A* with it finds a shortest plan."],
+    ["Relaxation", "Remove rules, solve the easier problem exactly, use its plan length as h."],
+    ["Goal count", "Number of goal facts still false. Admissible but weak."],
+    ["Ignore preconditions", "Any action any time; fewest actions covering the goal facts (set cover)."],
+    ["Ignore delete lists (h_FF)", "Facts only pile up; grow layers, extract a relaxed plan, count its actions."],
+    ["h_max", "Fact cost = 1 + max of precondition costs; goal = max over goal facts. Admissible."],
+    ["h_add", "Fact cost = 1 + sum of precondition costs; can double-count shared actions."],
+    ["f = g + h", "A*: actions so far plus estimated actions left; expand the lowest f."],
+    ["Preferred actions", "Try the relaxed plan's actions first; fast, not guaranteed optimal."]
   ],
-  check: { q: "Why is ignoring delete lists usually a closer estimate than ignoring preconditions?",
-    options: ["It deletes more facts", "It keeps preconditions, so the relaxed plan still makes actions legal", "It is not admissible", "It ignores the goal"], answer: 1,
-    why: "Ignoring preconditions skips the hard part (Load, Fly). Ignoring deletes still needs Load and Fly before Unload." },
+  check: { q: "Why is ignoring delete lists usually a much closer estimate than ignoring preconditions?", options: ["It deletes more facts", "It keeps preconditions, so Load and Fly are still needed before Unload", "It is always admissible", "It ignores the goal"] },
   mcq: [
-    { q: "True cost is 3. Which estimate is NOT admissible?", options: ["0", "2", "3", "4"], answer: 3,
-      fb: ["Zero never overestimates (but is useless).", "Under the true cost: admissible.", "Equal is fine.", "Correct: it overestimates."] },
-    { q: "Goal: On(C, Table) ∧ Clear(A). One action, MoveToTable(C, A), produces both. Set-cover h = ?", options: ["0", "1", "2", "3"], answer: 1,
-      fb: ["Both facts are unmet.", "Correct: one action covers both facts.", "That counts facts, not actions.", "Too many."] },
-    { q: "Subgoal costs are 3, 5 and 4. The admissible decomposition estimate is…", options: ["3", "4", "5", "12"], answer: 2,
-      fb: ["MIN is admissible but very loose; the section uses MAX.", "Not a combination rule.", "Correct: MAX.", "SUM can overestimate."] },
-    { q: "Which planner is built around the ignore-delete-lists heuristic?", options: ["Graphplan", "FF (Fast Forward)", "SATPlan", "O-PLAN"], answer: 1,
-      fb: ["Graphplan uses planning graphs.", "Correct.", "SATPlan uses a SAT solver.", "O-PLAN is hierarchical."] },
-    { q: "Why can “preferred actions” miss the best plan?", options: ["They are admissible", "They prune actions that are not in the relaxed plan", "They ignore the goal", "They only work backward"], answer: 1,
-      fb: ["Admissibility is about estimates, not pruning.", "Correct: forward pruning can drop the optimal action.", "The relaxed plan targets the goal.", "They are used in forward search."] }
-  ]
-},
-{
-  id: "s114", kind: "section", part: "p1", slides: [46, 57],
-  label: "11.4", title: "Hierarchical Planning",
-  blurb: "High-level actions, refinements and implementations; why hierarchy saves exponentially; angelic semantics, reachable sets and optimistic/pessimistic bounds.",
-  learn: `
-<h3>1. High-level actions and refinements</h3>
-<p>A <b>high-level action (HLA)</b> such as <span class="f">Go(Home, SFO)</span> can be carried out in more than one way. Each way is a <b>refinement</b>:</p>
-<div class="rule"><span class="f">Refinement(Go(Home, SFO), STEPS: [Drive(Home, SFOLongTermParking), Shuttle(SFOLongTermParking, SFO)])</span><br><span class="f">Refinement(Go(Home, SFO), STEPS: [Taxi(Home, SFO)])</span></div>
-<p>A refinement made only of primitive actions is an <b>implementation</b>. A refinement library is expert know-how built into the planner.</p>
-<h3>2. “At least one” is enough</h3>
-<p>A high-level plan achieves the goal if <b>at least one</b> of its implementations does, because the agent itself chooses which one to run. The simplest algorithm starts from <span class="f">[Act]</span>, repeatedly replaces an HLA with one of its refinements, and simulates each fully primitive plan.</p>
-<h3>3. The payoff</h3>
-<p>Flat search costs about <span class="f">bᵈ</span>: with b = 10 and d = 7 that is 10,000,000 nodes. With r refinements of k steps each, hierarchical search costs about <span class="f">r^((d−1)/(k−1))</span>: with r = 2, k = 3 that is 2³ = 8. Hitachi's O-PLAN scheduled 350 products, 35 machines and over 2,000 operations this way.</p>
-<h3>4. Angelic semantics and the reachable set</h3>
-<p><span class="f">REACH(s, h)</span> is the set of states that <b>some</b> implementation of h can reach from s. The plan is feasible if <span class="f">REACH ∩ Goal ≠ ∅</span>. This is <b>angelic</b> choice: the agent picks. In <b>demonic</b> nondeterminism (Chapter 4) an adversary picks, so every outcome must succeed.</p>
-<div class="ex"><div class="ex-h">Worked example</div>Go(SFO, NY) has three implementations: fly direct, fly via Denver, take the train. All end at NY, so REACH = {At(NY)}. With Goal = {At(NY)}, the intersection is non-empty and the plan is feasible, without choosing a flight.</div>
-<h3>5. Optimistic and pessimistic bounds</h3>
-<ul><li><span class="f">REACH⁻</span> (pessimistic) contains only what certainly happens; <span class="f">REACH⁺</span> (optimistic) contains everything that might.</li>
-<li>If even REACH⁺ misses the goal → the plan <b>certainly fails</b>; prune it.</li>
-<li>If even REACH⁻ hits the goal → the plan <b>certainly works</b>; commit and refine later.</li>
-<li>Otherwise → uncertain; refine further. <b>Angelic search</b> does exactly this, and is roughly linear on the vacuum world where flat search is about 5ᵈ.</li></ul>
-<div class="ng"><div class="ng-h">Northgate</div>Admit(Maria) has two refinements: scheduled intake (Register, Prep, TransferToOR) needs a free room; emergency fast-track (TriageOverride, TransferToOR) does not. With OR3 occupied, one implementation hits the goal, so Admit(Maria) is feasible.</div>
-<div class="mistake"><b>Common mistake:</b> requiring <i>every</i> implementation to work. That is the demonic test; for HLAs, one good implementation is enough.</div>`,
-  cards: [
-    ["High-level action (HLA)", "An action that can be carried out in more than one way, e.g. Go(Home, SFO)."],
-    ["Refinement", "One way to carry out an HLA: a sequence of (possibly high-level) steps."],
-    ["Implementation", "A refinement made only of primitive, executable actions."],
-    ["Hierarchical cost", "About r^((d−1)/(k−1)) instead of bᵈ: roughly the k-th root of flat search."],
-    ["Downward refinement property", "If a high-level plan claims success, some implementation really succeeds."],
-    ["REACH(s, h)", "States that some implementation of h can reach from s."],
-    ["Angelic vs demonic", "Agent chooses: one success is enough / Adversary chooses: all must succeed."],
-    ["REACH⁻ and REACH⁺", "Pessimistic (certain) and optimistic (possible) bounds on the reachable set."],
-    ["Angelic search", "Prune provable failures, commit to provable successes, refine only what's uncertain."]
-  ],
-  check: { q: "REACH⁺ meets the goal but REACH⁻ does not. What should the planner do?",
-    options: ["Prune the plan", "Commit to the plan", "Refine the plan further", "Switch to flat search"], answer: 2,
-    why: "The plan might work but is not certain, so refine to find out. Prune only if even REACH⁺ misses; commit only if REACH⁻ hits." },
-  mcq: [
-    { q: "A high-level plan achieves the goal if…", options: ["every implementation achieves it", "at least one implementation achieves it", "it has no primitive actions", "REACH⁻ = REACH⁺"], answer: 1,
-      fb: ["That is the demonic test.", "Correct: the agent picks the implementation.", "Plans must end in primitives.", "Equal bounds are not required."] },
-    { q: "Flat search with b = 10, d = 7 versus a hierarchy with r = 2, k = 3. The hierarchy explores about…", options: ["10,000,000", "70", "8", "1"], answer: 2,
-      fb: ["That is flat search.", "Not the formula.", "Correct: 2^((7−1)/(3−1)) = 2³ = 8.", "Too few."] },
-    { q: "Which is an implementation of Go(Home, SFO)?", options: ["[Go(Home, SFO)]", "[Drive(Home, SFOLongTermParking), Shuttle(SFOLongTermParking, SFO)]", "[Admit(Maria)]", "[Act]"], answer: 1,
-      fb: ["Still high level.", "Correct: all primitive.", "Unrelated HLA.", "The top-level HLA."] },
-    { q: "REACH(s, Go(SFO, NY)) = {At(NY)}, Goal = {At(Boston)}. Conclusion?", options: ["Feasible", "Infeasible: REACH ∩ Goal = ∅", "Need to refine", "Need sensors"], answer: 1,
-      fb: ["The sets do not overlap.", "Correct: prune it.", "Exact REACH already decides it.", "This is about reachability, not observation."] },
-    { q: "Why is Admit(Maria) feasible even though OR3 is occupied?", options: ["Every refinement works", "The fast-track refinement reaches the goal", "Occupied rooms are ignored", "HLAs never fail"], answer: 1,
-      fb: ["The scheduled intake fails.", "Correct: one successful implementation is enough.", "The scheduled intake checks the room.", "HLAs can fail when no implementation works."] }
-  ]
-},
-{
-  id: "s115", kind: "section", part: "p1", slides: [58, 71],
-  label: "11.5", title: "Planning in Nondeterministic Domains",
-  blurb: "Belief states, sensorless planning and the coercion trick, conditional effects, contingent plans, online planning and execution monitoring.",
-  learn: `
-<h3>1. From classical to online planning</h3>
-<p><b>Classical</b>: one known state, one fixed plan. <b>Sensorless</b>: the state is uncertain and there are no sensors. <b>Contingent</b>: there are sensors, and the plan branches on what is observed. <b>Online</b>: act, observe, repair.</p>
-<h3>2. Belief states</h3>
-<p>A <b>belief state</b> is the set of every world that might be real. The closed-world assumption must go: an unlisted fact is now <b>unknown</b>, not false. Paint example: <span class="f">b₀ = {s₁: Color(Can1, Red), s₂: Color(Can1, Blue)}</span>.</p>
-<h3>3. Sensorless planning and coercion</h3>
-<p>Apply the RESULT rule to <b>every</b> world at once. <span class="f">Paint(Chair, Can1)</span> then <span class="f">Paint(Table, Can1)</span> leaves the chair and table the same colour in every world, so the goal holds even though the agent never learns the colour. This is <b>coercion</b>: choose actions that make the goal true whatever the hidden fact is.</p>
-<h3>4. Conditional effects</h3>
-<div class="rule"><span class="f">Suck, EFFECT: when AtL: CleanL ∧ when AtR: CleanR</span></div>
-<p>If the location is unknown, both outcomes must be kept: <span class="f">(AtL ∧ CleanL) ∨ (AtR ∧ CleanR)</span>. Chains of such actions can make belief states grow exponentially. The fix is to prefer plans that keep beliefs small: Left, Suck, Right, Suck.</p>
-<h3>5. Contingent plans</h3>
-<p>A <b>percept schema</b>, e.g. <span class="f">Percept(Color(x, c), PRE: Object(x) ∧ InView(x))</span>, models the sensors. A contingent plan can branch:</p>
-<div class="rule"><span class="f">[LookAt(Table), LookAt(Chair), if Color(Table, c) ∧ Color(Chair, c) then NoOp else […]]</span></div>
-<p>The full paint plan has three layers of fallback: look first; if a can matches one piece, paint only the other; use coercion only as a last resort.</p>
-<h3>6. Online planning and execution monitoring</h3>
-<ul><li><b>Action monitoring</b>: check that the next action's preconditions still hold. Catches trouble at the last moment.</li>
-<li><b>Plan monitoring</b>: check that the whole remaining plan still works. Catches trouble early, and notices good luck.</li>
-<li><b>Goal monitoring</b>: ask whether there is now a better goal.</li></ul>
-<p>Retrying works for a patchy coat of paint; an empty can needs the model to be updated.</p>
-<div class="ng"><div class="ng-h">Northgate: why no coercion</div>Paint's goal is indifferent to the hidden colour. Maria's goal is “treat what she actually has”: operating helps appendicitis but harms gastroenteritis. No single action is right for every diagnosis, so the plan must <b>sense first</b>: <span class="f">[OrderCTScan(Maria), if Diagnosis(Maria, Appendicitis) then [surgery] else [Prescribe(Antibiotics), Discharge(Maria)]]</span>.</div>
-<div class="mistake"><b>Common mistake:</b> using a sensorless plan when the right action depends on the hidden fact. Coercion is safe only when the goal does not depend on it.</div>`,
-  cards: [
-    ["Belief state", "The set of all worlds that might be real; an unlisted fact is unknown, not false."],
-    ["Sensorless plan", "One action sequence that reaches the goal in every possible world."],
-    ["Coercion", "Make the goal true whatever the hidden fact is (paint both from the same can)."],
-    ["Conditional effect", "when Cond: Effect — the effect depends on the state; it can blow up belief states."],
-    ["Percept schema", "The planner's model of its sensors: what it perceives, under which preconditions."],
-    ["Contingent plan", "A plan with if-then-else branches on observations."],
-    ["Online planning", "Act, observe, repair, continue toward the same goal."],
-    ["Action / plan / goal monitoring", "Check the next step / the rest of the plan / whether a better goal exists."]
-  ],
-  check: { q: "Why can a sensorless plan solve the paint problem but not Maria's treatment?",
-    options: ["Paint has fewer actions", "Any matching colour satisfies the paint goal, but the right treatment depends on the hidden diagnosis", "Hospitals have no sensors", "Belief states cannot contain diseases"], answer: 1,
-    why: "Coercion works only when the goal is indifferent to the hidden fact. When it is not, the agent must sense first." },
-  mcq: [
-    { q: "In a belief state, a fact that is not listed is…", options: ["false", "true", "unknown", "an error"], answer: 2,
-      fb: ["That is the closed-world view of 11.1.", "Nothing makes it true.", "Correct.", "Belief states are normal."] },
-    { q: "b₀ = {Can1 = Red, Can1 = Blue}. After Paint(Chair, Can1), how many worlds?", options: ["1", "2", "4", "0"], answer: 1,
-      fb: ["The colour is still unknown.", "Correct: one per can colour, each with the chair painted that colour.", "No new uncertainty is added.", "Painting is applicable in both."] },
-    { q: "Which monitoring level notices that there is too little red paint before painting the chair?", options: ["Action monitoring", "Plan monitoring", "Goal monitoring", "None"], answer: 1,
-      fb: ["It checks only the next action.", "Correct: it checks the whole remaining plan.", "That asks about better goals.", "Plan monitoring catches it."] },
-    { q: "Suck has EFFECT: when AtL: CleanL ∧ when AtR: CleanR, and the location is unknown. After Suck…", options: ["CleanL ∧ CleanR", "(AtL ∧ CleanL) ∨ (AtR ∧ CleanR)", "Nothing changes", "AtL ∧ AtR"], answer: 1,
-      fb: ["Only one square is cleaned.", "Correct: keep both possibilities.", "One square is cleaned.", "The robot is in one place."] },
-    { q: "The first step of Maria's safe contingent plan is…", options: ["Operate", "Prescribe antibiotics", "Order a CT scan", "Discharge"], answer: 2,
-      fb: ["That may harm her.", "Wrong if she has appendicitis.", "Correct: gather information first.", "Premature."] }
-  ]
-},
-{
-  id: "s116", kind: "section", part: "p1", slides: [72, 83],
-  label: "11.6", title: "Time, Schedules and Resources",
-  blurb: "Plan first, schedule later: job-shop problems, the critical path method, slack, resource constraints, aggregation and the minimum-slack heuristic, from car assembly to operating rooms.",
-  learn: `
-<h3>1. What classical planning leaves out</h3>
-<p>Time (when actions start and how long they take) and shared <b>resources</b>. The usual approach is to <b>plan first, schedule later</b>.</p>
-<h3>2. A job-shop problem</h3>
-<div class="rule"><span class="f">Job 1: AddEngine1 ≺ AddWheels1 ≺ Inspect1</span> · <span class="f">Job 2: AddEngine2 ≺ AddWheels2 ≺ Inspect2</span><br>Resources: EngineHoists(1), WheelStations(1), Inspectors(2), LugNuts(500)</div>
-<p><span class="f">A ≺ B</span> means A must finish before B starts. Writing <span class="f">Inspectors(2)</span> instead of two named people is <b>aggregation</b>: it keeps the problem small and makes capacity checks instant.</p>
-<h3>3. The critical path method</h3>
-<div class="rule"><span class="f">ES(Start) = 0</span> · <span class="f">ES(B) = max over A ≺ B of ES(A) + Dur(A)</span> · <span class="f">Slack = LS − ES</span></div>
-<p>ES is the earliest start, LS the latest start that does not delay the project. <b>Zero slack</b> means the action is on the <b>critical path</b>: any delay there delays everything.</p>
-<div class="ex"><div class="ex-h">Two cars, no resource limits</div>Car 1: engine 0–30, wheels 30–60, inspect 60–70 (slack 15 each). Car 2: engine 0–60, wheels 60–75, inspect 75–85 (slack 0: critical). Makespan 85, but both engines use the single hoist at time 0.</div>
-<h3>4. Resources make it hard</h3>
-<div class="rule"><span class="f">Start(A) + Dur(A) ≤ Start(B) &nbsp; OR &nbsp; Start(B) + Dur(B) ≤ Start(A)</span></div>
-<p>Each shared resource adds an either-or choice, and these choices multiply: scheduling with resources is <b>NP-hard</b>. With the hoist constraint the best schedule takes <b>115</b> minutes (engine 1 first). The <b>minimum-slack heuristic</b> (schedule the ready action with least slack first, like MRV in CSPs) gives engine 2 the hoist first and finishes at <b>130</b>: fast, but not optimal.</p>
-<div class="ng"><div class="ng-h">Northgate: two patients</div>Maria: prep 20, surgery 45, check 10. David: prep 20, surgery 60, check 10. With two ORs and two nurses both finish by 90 (David's path is critical; Maria has 15 minutes of slack). But there is <b>one anesthesiologist</b>: the surgeries cannot overlap, and the best finish is 135 in either order. The rooms were never the bottleneck. Find what is actually scarce first.</div>
-<div class="mistake"><b>Common mistake:</b> assuming the greedy heuristic is optimal. Minimum slack gives 130 on the cars, while the optimum is 115.</div>`,
-  cards: [
-    ["Plan first, schedule later", "Decide what to do, then add durations and resource limits."],
-    ["A ≺ B", "A must finish before B starts."],
-    ["Aggregation", "Count interchangeable resources (Inspectors(2)) instead of naming each one."],
-    ["ES / LS", "Earliest start / latest start without delaying the project."],
-    ["Slack", "LS − ES. Zero slack = on the critical path."],
-    ["Critical path", "The longest chain of dependent actions; it sets the makespan."],
-    ["Resource constraint", "A before B OR B before A: either-or choices make scheduling NP-hard."],
-    ["Minimum-slack heuristic", "Schedule the least-slack ready action first; fast, not guaranteed optimal."]
-  ],
-  check: { q: "Without resource limits, which car's steps have zero slack?",
-    options: ["Car 1", "Car 2", "Both", "Neither"], answer: 1,
-    why: "Car 2's chain (60 + 15 + 10 = 85) sets the makespan; Car 1 (30 + 30 + 10 = 70) has 15 minutes of slack." },
-  mcq: [
-    { q: "ES(AddEngine1) = 0 and Dur = 30. ES(AddWheels1) = ?", options: ["0", "15", "30", "60"], answer: 2,
-      fb: ["The engine must finish first.", "That is the slack.", "Correct: 0 + 30.", "That is the wheels' finish time."] },
-    { q: "An action has ES = 30 and LS = 45. Its slack is…", options: ["0", "15", "45", "75"], answer: 1,
-      fb: ["It is not critical.", "Correct: LS − ES.", "That is LS.", "That is LS + ES."] },
-    { q: "Why does one engine hoist make the schedule harder to compute?", options: ["It adds durations", "It adds an either-or choice between the two engines", "It removes ordering constraints", "It changes the goal"], answer: 1,
-      fb: ["Durations were already there.", "Correct: disjunctions make the problem NP-hard.", "Orderings remain.", "The goal is unchanged."] },
-    { q: "With one anesthesiologist, the earliest both Northgate pathways can finish is…", options: ["90", "105", "135", "155"], answer: 2,
-      fb: ["That ignores the shared specialist.", "That is only the two surgeries back to back.", "Correct: 20 + 45 + 60 + 10.", "Too late."] },
-    { q: "Writing Inspectors(2) rather than Inspector(Ann) and Inspector(Bob) is called…", options: ["Abstraction", "Aggregation", "Decomposition", "Grounding"], answer: 1,
-      fb: ["Abstraction merges states.", "Correct.", "Decomposition splits goals.", "Grounding substitutes constants."] }
-  ]
-},
-{
-  id: "s117", kind: "section", part: "p1", slides: [84, 89],
-  label: "11.7", title: "Analysis of Planning Approaches",
-  blurb: "Why planning is combinatorially hard, why planners still win by exploiting structure, portfolio planning, and where planning leads next.",
-  learn: `
-<h3>1. Why planning is hard</h3>
-<p>Each fact can be true or false independently, so n facts give up to <span class="f">2ⁿ</span> states: 10 facts give about 1,000 states, 30 facts about a billion, and 300 facts more than there are atoms in the universe. Large Air Cargo faces about 2000⁴¹ nodes. Combinatorial explosion is the default, not the exception.</p>
-<h3>2. Why planners still win: structure</h3>
-<p>Every technique in the chapter exploits structure rather than raw computing power:</p>
-<ul><li>a <b>factored representation</b> (11.1)</li><li><b>goal-directed search</b> (11.2)</li><li><b>relaxed heuristics</b> (11.3)</li><li><b>abstraction and decomposition</b> (11.3)</li><li><b>hierarchy</b> (11.4)</li></ul>
-<p>The biggest lever is <b>independent subproblems</b>: full decomposition gives an exponential speed-up. <b>Negative interactions</b>, where one action undoes another's progress, break independence. SAT planners encode them in logic; forward search handles them with heuristics.</p>
-<h3>3. Portfolio planning</h3>
-<p>No single planner wins everywhere. <b>Portfolio planning</b> runs several planners, in sequence or in parallel, and keeps the best answer. Fast Downward Stone Soup is a well-known example.</p>
-<h3>4. Where planning leads</h3>
-<ul><li>Known effects → probabilities on outcomes: <b>MDPs</b> (Chapter 16).</li>
-<li>Belief states → probabilistic beliefs: <b>POMDPs</b> (Chapter 16).</li>
-<li>A given model → learning how to act from experience: <b>reinforcement learning</b> (Chapter 23).</li></ul>
-<h3>5. Same toolkit, two worlds</h3>
-<table class="mini"><tr><th>Idea</th><th>Air Cargo</th><th>Northgate</th></tr>
-<tr><td>RESULT rule</td><td>Fly moves a plane</td><td>TransferToOR moves a patient</td></tr>
-<tr><td>Relaxation</td><td>ignore Load's deletes</td><td>ignore TransferToOR's deletes</td></tr>
-<tr><td>HLAs</td><td>Go(Home, SFO)</td><td>Admit(Maria)</td></tr>
-<tr><td>Belief states</td><td>coercion works for paint</td><td>diagnosis needs sensing</td></tr>
-<tr><td>Scheduling</td><td>one engine hoist</td><td>one anesthesiologist</td></tr></table>
-<div class="mistake"><b>Common mistake:</b> concluding that planning is impractical because it is hard in the worst case. Real problems have structure, and planners exploit it.</div>`,
-  cards: [
-    ["2ⁿ states", "n independent true/false facts give up to 2ⁿ states."],
-    ["Exploit structure", "Factored states, goal-directed search, relaxations, abstraction, decomposition, hierarchy."],
-    ["Independent subproblems", "Full decomposition gives an exponential speed-up."],
-    ["Negative interaction", "One action undoes another's progress, breaking independence."],
-    ["Portfolio planning", "Run several planners and keep the best answer (e.g. Fast Downward Stone Soup)."],
-    ["MDP / POMDP", "Planning with probabilistic outcomes / with probabilistic beliefs (Chapter 16)."],
-    ["Reinforcement learning", "Learning how to act from experience when no model is given (Chapter 23)."]
-  ],
-  check: { q: "A domain has 30 independent true/false facts. Roughly how many states?",
-    options: ["30", "900", "About a billion", "2³⁰⁰"], answer: 2,
-    why: "2³⁰ ≈ 1.07 billion. 30 and 900 are linear and quadratic; 2³⁰⁰ is the 300-fact case." },
-  mcq: [
-    { q: "What do factored states, relaxed heuristics and hierarchy have in common?", options: ["They all use SAT solvers", "They all exploit problem structure", "They all remove the goal", "They all need sensors"], answer: 1,
-      fb: ["Only SATPlan does.", "Correct.", "They keep the goal.", "Sensors are a 11.5 topic."] },
-    { q: "Which interaction breaks the speed-up from decomposition?", options: ["Independent subgoals", "Negative interactions", "Symmetry", "Abstraction"], answer: 1,
-      fb: ["Independence enables the speed-up.", "Correct.", "Symmetry helps pruning.", "Abstraction is a heuristic tool."] },
-    { q: "Fast Downward Stone Soup is an example of…", options: ["Hierarchical planning", "Portfolio planning", "Contingent planning", "Critical path scheduling"], answer: 1,
-      fb: ["Not an HTN planner.", "Correct.", "Not about sensing.", "Not a scheduler."] },
-    { q: "Which later topic attaches probabilities to action outcomes?", options: ["Reinforcement learning", "MDPs", "Partial-order planning", "PDDL"], answer: 1,
-      fb: ["RL learns the model or policy from experience.", "Correct: Chapter 16.", "Not probabilistic.", "PDDL is deterministic."] },
-    { q: "Which comparison shows the one real difference between Air Cargo and Northgate?", options: ["RESULT rule", "Relaxation", "Belief states", "Scheduling"], answer: 2,
-      fb: ["Identical equation.", "Same code.", "Correct: coercion works for paint, but diagnosis needs sensing.", "Same bottleneck maths."] }
-  ]
-},
-{
-  id: "wrap", kind: "section", part: "p1", slides: [90, 93],
-  label: "End", title: "Wrap-Up and Review",
-  blurb: "Planning = representation + search + structure. A recap of the chapter and three closing questions that tie 11.1, 11.3 and 11.5 together.",
-  learn: `
-<h3>1. Planning = representation + search + structure</h3>
-<ul><li><b>Representation:</b> factored states and action schemas let a computer reason about a domain instead of searching it blindly.</li>
-<li><b>Search:</b> forward, backward and logic-based search are all possible because the representation is a description, not a program.</li>
-<li><b>Structure:</b> heuristics, abstraction, decomposition and hierarchy defeat exponential state spaces in practice.</li></ul>
-<h3>2. What you should be able to explain</h3>
-<table class="mini"><tr><th>Area</th><th>Key ideas</th></tr>
-<tr><td>Representation</td><td>Init, actions, goal; states as sets of facts; preconditions, add and delete lists; RESULT</td></tr>
-<tr><td>Algorithms</td><td>forward, backward, SAT, partial-order</td></tr>
-<tr><td>Scaling</td><td>relaxed heuristics, abstraction, decomposition, hierarchy</td></tr>
-<tr><td>Beyond classical</td><td>belief states, contingent and online plans, scheduling with time and resources</td></tr></table>
-<h3>3. Three closing questions</h3>
-<div class="ex"><div class="ex-h">1 · §11.1</div>When does the closed-world assumption work, and when does it become unrealistic? <i>It works when records are complete; it fails when facts can genuinely be unknown.</i></div>
-<div class="ex"><div class="ex-h">2 · §11.3</div>Why is ignoring delete lists a closer estimate than ignoring preconditions? <i>It keeps the preconditions, so the relaxed plan still does the real work of making actions legal.</i></div>
-<div class="ex"><div class="ex-h">3 · §11.5</div>Why must the closed-world assumption go in belief states? <i>The planner tracks every possible world, so an unlisted fact means unknown, not false.</i></div>
-<p>Real systems built on these ideas include NASA's Remote Agent, Hitachi's O-PLAN factory scheduler, Mars rover mission planning and modern logistics.</p>`,
-  cards: [
-    ["The one idea", "Planning = representation + search + structure."],
-    ["Representation", "Factored states and action schemas: a description, not a program."],
-    ["Search", "Forward, backward, SAT — all possible because PDDL is declarative."],
-    ["Structure", "Heuristics, abstraction, decomposition and hierarchy beat exponential spaces."],
-    ["Closed world vs belief state", "Unlisted = false / unlisted = unknown."],
-    ["Domain independence", "The same algorithms and code for cargo and for patient care."]
-  ],
-  check: { q: "Which statement best summarizes Chapter 11?",
-    options: ["Planning is search with a bigger computer", "Planning = representation + search + structure", "Planning needs a human heuristic per domain", "Planning only works for toy problems"], answer: 1,
-    why: "The chapter's throughline: a declarative representation enables many search methods, and structure makes them scale." },
-  mcq: [
-    { q: "A hospital's records are incomplete. Which assumption becomes unrealistic?", options: ["Determinism", "The closed-world assumption", "Discreteness", "Admissibility"], answer: 1,
-      fb: ["Not about missing records.", "Correct: unlisted facts may be unknown, not false.", "Not about time steps.", "A heuristic property."] },
-    { q: "Ignoring delete lists beats ignoring preconditions because…", options: ["it is not admissible", "it keeps preconditions, so actions must still be made legal", "it deletes the goal", "it uses SAT"], answer: 1,
-      fb: ["Both are relaxations; admissibility is not the reason.", "Correct.", "Nonsense.", "Unrelated."] },
-    { q: "Which pairing is correct?", options: ["Regression — searches from Init", "SATPlan — one action per step, increase k if UNSAT", "Coercion — sense first", "Slack — ES + LS"], answer: 1,
-      fb: ["Regression starts from the goal.", "Correct.", "Coercion avoids sensing.", "Slack = LS − ES."] },
-    { q: "Which real system used serializable subgoals to fly a spacecraft?", options: ["O-PLAN", "Remote Agent", "FF", "Stone Soup"], answer: 1,
-      fb: ["O-PLAN scheduled a factory.", "Correct: Deep Space One, 1999.", "A classical planner.", "A planner portfolio."] },
-    { q: "REACH(s, h) ∩ Goal ≠ ∅ means…", options: ["Every implementation works", "Some implementation reaches the goal", "The goal is unreachable", "The agent needs sensors"], answer: 1,
-      fb: ["That is the demonic reading.", "Correct: angelic semantics.", "The opposite.", "Unrelated."] }
+    { q: "True cost is 3. Which estimate is NOT admissible?", options: ["0", "2", "3", "4"] },
+    { q: "Goal count gives S1 and S2 the same value 1. What is the consequence for A*?", options: ["A* fails", "A* can't tell which is closer and may expand the worse one", "A* returns a longer plan", "Nothing"] },
+    { q: "Relaxed layers from S0: layer 1 adds C2 in P2 and P2@SFO; layer 2 adds C2@SFO. The relaxed plan is {Load, Fly, Unload}. h_FF = ?", options: ["1", "2", "3", "4"] },
+    { q: "Fact costs: C2 in P2 = 1, P2@SFO = 1. Unload needs both. Cost of C2@SFO with h_max and h_add?", options: ["2 and 2", "2 and 3", "3 and 3", "1 and 2"] },
+    { q: "A* frontier: S2 (f = 4), S3 (f = 3). Which is expanded next?", options: ["S2, it was added first", "S3, lower f", "Both", "Neither: stop"] },
+    { q: "Why can h_add overestimate?", options: ["It ignores preconditions", "It counts a shared action once for each goal that needs it", "It uses max", "It never can"] },
+    { q: "Which planner made the ignore-delete-lists heuristic famous?", options: ["Graphplan", "FF (Fast Forward)", "SATPlan", "STRIPS"] }
   ]
 }
 );
+})();

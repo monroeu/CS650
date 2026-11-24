@@ -1,18 +1,27 @@
-# CS650 Week 11 Lab — Chapter 11: Automated Planning
+# CS650 Week 11 Lab (v3) — Chapter 11: Automated Planning
 
-Copy this `week11` folder into the root of the `monroeu/CS650` repository (next to `week07`, `week08`, `shared/`) and push.
+This folder replaces the existing `week11` folder in the `monroeu/CS650` repository. Delete the old `week11` contents, copy this folder in, and push.
 
 * Live URL after GitHub Pages builds: https://monroeu.github.io/CS650/week11/
-* Sign-in, roster check, active-time tracking and the PDF report use the shared Monroe participation scripts in `../shared/` (same as Week 8).
-* `assets/participation.json` registers the lab (slug `chapter-11-automated-planning`, version 1). The **Sync participation catalog** GitHub Action sends it to Supabase on push. Then publish the Week 11 lab for your section(s) in the instructor dashboard, as you did for Week 8.
+* `assets/participation.json` is **unchanged** (same slug and version), so the catalog sync has nothing new to register and the lab's published status is not touched.
+* Progress is stored under a new browser key (`cs650-ch11-planning-lab-v3`), so students start the v3 activities fresh. Sign-in, active time and the PDF report work as before.
+
+## Each section now runs
+Watch (v3 narrated video) → **Read** (illustrated pamphlet, printable) → **Step by step** (interactive traces, in 11.2–11.6) → Flip cards → Check → MCQs → Try it
 
 ## What is inside
 | Path | Contents |
 |---|---|
-| `index.html` | the lab page (Watch → Learn → Flip cards → Check → MCQs → Try it) |
-| `media/p1/sNN_k.webp`, `aNN.mp3` | 474 lecture frames and 93 narrated slide audio files |
-| `assets/lecture-data.js` | slide timings, click times and the narration script (shown/hidden by the student) |
-| `assets/content11.js` | nine modules: key concepts, flip cards, a knowledge check and 5 MCQs each |
-| `assets/exercises11.js` | 40 Try it exercises with automatic checks |
-| `assets/fl-engine.js` | formal-language engine: propositional logic, first-order logic, unification, categories, PDDL planning (forward, backward, A*, SAT), heuristics, hierarchical planning, belief states, scheduling |
-| `assets/workspace.js` | the Try it interface: symbol crumbs, notation reference, run buttons, result views |
+| `media/p1/sNN_k.webp`, `aNN.mp3` | 627 lecture frames and 126 narrated slide audio files (v3 deck) |
+| `assets/lecture-data.js` | slide timings and the show/hide narration script |
+| `assets/pamkit.js` | drawing helpers for the pamphlets (fact cards, scenes, trees, flows) |
+| `assets/content11.js`, `content11b.js` | nine modules: pamphlet, flip cards, check, MCQs with per-option feedback |
+| `assets/trace.js`, `traces11.js` | the step-by-step tracer and 17 traces (BFS, backward, SAT, Graphplan, goal count, ignore preconditions, h_FF, h_max/h_add, A*, hierarchical search, belief states, critical path) |
+| `assets/exercises11.js`, `fl-engine.js`, `workspace.js` | 40 Try it exercises and the formal-language engine (unchanged) |
+
+## Grading and the lab standard (added)
+
+- The header shows **Grade so far**; click it for the rubric breakdown. MCQs are scored on the first answer; retries are practice.
+- Change the weights for one lab with `window.LAB_RUBRIC = {...}` before `app.js` (see `LAB_STANDARD.md`, section 10).
+- The grade and the per-part breakdown are included in the participation report (`grade`, `gradeRows`).
+- Before publishing any lab, run `node tools/check_lab.js` from the lab folder. `LAB_STANDARD.md` is the authoring guide.

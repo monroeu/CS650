@@ -163,7 +163,7 @@
         <div class="crumbs"></div>
         <textarea class="code" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Code for ${esc(ex.title)}"></textarea>
         <div class="cmds"></div>
-        <div class="row small"><button class="ghost reset">Reset code</button>${ex.solution ? '<button class="ghost sol">Show a solution</button>' : ""}${ex.hint ? '<button class="ghost hintb">Hint</button>' : ""}<span class="check"></span></div>
+        <div class="row small"><button class="ghost reset">Reset code</button><button class="ghost sol" hidden title="Available once this exercise is credited">Show a solution</button>${ex.hint ? '<button class="ghost hintb">Hint</button>' : ""}<span class="check"></span></div>
         <div class="hintbox" hidden>${ex.hint || ""}</div>
         <div class="out" aria-live="polite"></div>
         ${ex.notice ? `<div class="notice"><b>What to notice.</b> ${ex.notice}</div>` : ""}
@@ -193,9 +193,15 @@
         if (meets(ex, cmd, r)) pass(); else if (ex.expect) { chk.className = "check no"; chk.textContent = ex.expect.label ? "Not yet — " + ex.expect.label : "Ran. Compare the result with the task."; }
       }, 30);
     }
-    function pass() { chk.className = "check ok"; chk.textContent = "✓ Matches the expected result"; if (!st.passed[ex.id]) { st.passed[ex.id] = true; st.save(); el.classList.add("passed"); el.querySelector(".ex-badge").textContent = "✓ Done"; st.onPass(ex.id); } }
+    function pass() { chk.className = "check ok"; chk.textContent = "✓ Matches the expected result"; if (!st.passed[ex.id]) { st.passed[ex.id] = true; st.save(); el.classList.add("passed"); el.querySelector(".ex-badge").textContent = "✓ Done"; el._refreshSol && el._refreshSol(); st.onPass(ex.id); } }
     el.querySelector(".reset").onclick = () => { ta.value = ex.code; delete st.code[ex.id]; st.save(); fit(); out.innerHTML = ""; chk.textContent = ""; };
-    const sb = el.querySelector(".sol"); if (sb) sb.onclick = () => { if (confirm("Replace your code with a worked solution?")) { ta.value = ex.solution; st.code[ex.id] = ta.value; st.save(); fit(); } };
+    // The worked solution appears only after the exercise is credited. In the published lab the
+    // solution text is not in the page: the server sends it once the exercise is recorded as done.
+    const solOf = () => (st.solutions && st.solutions[ex.id]) || ex.solution || null;
+    const sb = el.querySelector(".sol");
+    el._refreshSol = () => { sb.hidden = !(st.passed[ex.id] && solOf()); };
+    sb.onclick = () => { const sol = solOf(); if (sol && confirm("Replace your code with a worked solution? Your exercise stays credited.")) { ta.value = sol; st.code[ex.id] = ta.value; st.save(); fit(); } };
+    el._refreshSol();
     const hb = el.querySelector(".hintb"); if (hb) hb.onclick = () => { const h = el.querySelector(".hintbox"); h.hidden = !h.hidden; };
     el.addEventListener("toggle", () => { if (el.open) fit(); });
     setTimeout(fit, 0);

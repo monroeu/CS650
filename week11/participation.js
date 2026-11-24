@@ -81,12 +81,153 @@
         if (!res.session) { await api({ action: 'start_session', offering_id: off.id, track: 'business' }); res = await api({ action: 'resume_session', offering_id: off.id }); }
         sessionId = res.session?.id || null; completion = res.completion || null;
         if (!sessionId) throw new Error('Your participation session could not be started.');
+        loadServerState(user.id, res);
         setStatus('Roster verified. Your ' + CFG.label + ' participation and study time are being recorded to Supabase.', 'ok');
         unlock();
       } catch (e) { lock(); setStatus(e.message || String(e), 'err'); }
     })().finally(() => { busy = null; });
     return busy;
   }
+
+  // ---------- server records ----------
+  // Every gradeable action (slide heard, reading, trace, study card, first answer, Try it) is written to
+  // participation-api, which keeps the first answer to each question and calculates the recorded grade.
+  const PFX = CFG.prefix;                                   // e.g. "CS11"; without it nothing is synced
+  const pad = (n, k) => String(n).padStart(k, '0');
+  let sent = new Set(), flushing = false, retryTimer = null, stopped = '';
+  const view = (type, key, secs) => ({ id: 'v:' + key, body: { action: 'record_view', activity_type: type, activity_key: key, dwell_seconds: secs || 2, visibility_ratio: 1 } });
+  function wanted() {
+    const S = window.LAB_SERVER, P = S.progress(), out = [];
+    for (const m of S.modules) {
+      const p = P[m.id]; if (!p) continue;
+      // answers are not queued here: each first answer goes straight to the server through LAB_ANSWER
+      (p.cards || []).forEach(i => { const k = PFX + '-F-' + m.id + '-' + pad(i + 1, 2); out.push({ id: 'c:' + k, body: { action: 'card_opened', card_key: k } }); });
+      if (p.learn) out.push(view('reading', PFX + '-RD-' + m.id));
+      Object.keys(p.trace || {}).filter(k => p.trace[k]).forEach(id => out.push(view('trace', PFX + '-TR-' + m.id + '-' + id)));
+      Object.keys(p.tryit || {}).filter(k => p.tryit[k]).forEach(id => out.push(view('tryit', PFX + '-TY-' + m.id + '-' + id)));
+      (p.watched || []).forEach(n => out.push(view('lecture_slide', PFX + '-SL' + pad(n, 3), S.slideSeconds(n))));
+    }
+    return out;
+  }
+  // first sign-in on this browser for this student: replace local progress with what the server holds
+  function loadServerState(uid, res) {
+    const S = window.LAB_SERVER; if (!S || !PFX) return;
+    if (S.owner() !== uid) S.reset(uid);                   // never upload another student's work from a shared computer
+    const byMod = Object.fromEntries(S.modules.map(m => [m.id, m]));
+    const slideMod = n => S.modules.find(m => n >= m.slides[0] && n <= m.slides[1]);
+    const known = new Set();
+    S.merge((P, mp) => {
+      for (const r of res.knowledge_responses || []) {
+        const mm = String(r.question_key).match(/^(.+)-(check|mcq-(\d+))$/); if (!mm || !byMod[mm[1]]) continue;
+        const p = mp(mm[1]), v = r.selected_answer, slot = mm[2] === 'check' ? 'check' : 'mcq' + (Number(mm[3]) - 1);
+        if (Number.isInteger(r.correct_answer)) p.keys[slot] = { answer: r.correct_answer, fb: r.feedback || null, why: r.explanation || '' };
+        if (slot === 'check') { p.first.check = v; if (p.check == null) p.check = v; }
+        else { const i = Number(mm[3]) - 1; p.first['mcq' + i] = v; if (p.mcq[i] == null) p.mcq[i] = v; }
+        known.add('q:' + r.question_key);
+      }
+      for (const k of res.card_keys || []) {
+        const mm = String(k).match(new RegExp('^' + PFX + '-F-(.+)-(\\d+)$')); if (!mm || !byMod[mm[1]]) continue;
+        const p = mp(mm[1]), i = Number(mm[2]) - 1; if (!p.cards.includes(i)) p.cards.push(i); known.add('c:' + k);
+      }
+      for (const v of res.view_activity || []) {
+        const k = String(v.activity_key); let mm;
+        if ((mm = k.match(new RegExp('^' + PFX + '-SL(\\d+)$')))) { const n = Number(mm[1]), m = slideMod(n); if (m) { const p = mp(m.id); if (!p.watched.includes(n)) p.watched.push(n); } }
+        else if ((mm = k.match(new RegExp('^' + PFX + '-RD-(.+)$'))) && byMod[mm[1]]) mp(mm[1]).learn = true;
+        else if ((mm = k.match(new RegExp('^' + PFX + '-TR-([^-]+)-(.+)$'))) && byMod[mm[1]]) mp(mm[1]).trace[mm[2]] = true;
+        else if ((mm = k.match(new RegExp('^' + PFX + '-TY-([^-]+)-(.+)$'))) && byMod[mm[1]]) mp(mm[1]).tryit[mm[2]] = true;
+        known.add('v:' + k);
+      }
+    });
+    sent = known; stopped = '';
+    S.setRecorded(res.completion || null);
+    flush();
+    mergeCode(res.code_saves || []);
+    for (const x of res.solutions || []) { const mm = String(x.activity_key).match(new RegExp('^' + PFX + '-TY-([^-]+)-(.+)$')); if (mm) S.setSolution(mm[1], mm[2], x.solution); }
+  }
+  async function flush() {
+    if (flushing || !sessionId || !PFX || !window.LAB_SERVER || stopped) return;
+    flushing = true; clearTimeout(retryTimer);
+    try {
+      const todo = wanted().filter(x => !sent.has(x.id));
+      for (const x of todo) {
+        if (!sessionId) break;
+        let r;
+        try { r = await api(Object.assign({ session_id: sessionId }, x.body)); }
+        catch (e) {
+          const msg = String(e.message || e);
+          if (/Only one attempt/i.test(msg)) { sent.add(x.id); continue; }
+          if (/closed|not open|not published|not enrolled/i.test(msg)) { stopped = msg; setStatus(msg + '. Your work is kept in this browser but is no longer being recorded.', 'err'); break; }
+          if (/Unknown activity|required|Invalid/i.test(msg)) { sent.add(x.id); console.warn('participation: skipped', x.id, msg); continue; }
+          retryTimer = setTimeout(flush, 15000); break;          // network or server hiccup: try again shortly
+        }
+        sent.add(x.id);
+        if (r && r.solution) { const mm = x.id.match(new RegExp('^v:' + PFX + '-TY-([^-]+)-(.+)$')); if (mm) window.LAB_SERVER.setSolution(mm[1], mm[2], r.solution); }
+        if (r && r.completion) { completion = r.completion; window.LAB_SERVER.setRecorded(r.completion); }
+      }
+    } finally { flushing = false; }
+    if (!stopped && sessionId && wanted().some(x => !sent.has(x.id)) && !retryTimer) setTimeout(flush, 500);
+  }
+  // First answer to a check question or MCQ: saved on the server, which then returns the key and explanations.
+  // If the server already holds an answer for this question, that earlier answer is the graded one.
+  window.LAB_ANSWER = async function (questionKey, choice) {
+    if (!sessionId) throw new Error('Sign in to answer: answers are saved and checked on the server.');
+    if (stopped) throw new Error(stopped + '.');
+    const r = await api({ action: 'answer_knowledge', session_id: sessionId, question_key: questionKey, selected_answer: choice });
+    if (r.completion) { completion = r.completion; window.LAB_SERVER?.setRecorded(r.completion); }
+    return { selected: r.selected_answer, answer: r.correct_answer, fb: r.feedback || null, why: r.explanation || '' };
+  };
+  // ---------- Try it code: the latest version of every exercise is kept on the server ----------
+  let codeSent = {}, codeSeen = {}, codeTimer = null;       // key -> code the server holds / code last seen here
+  const codeKey = (mod, id) => PFX + '-TY-' + mod + '-' + id;
+  function mergeCode(saves) {
+    const S = window.LAB_SERVER; codeSent = {};
+    const byKey = new Map(saves.map(c => [c.activity_key, c]));
+    S.merge((P, mp) => {
+      for (const m of S.modules) for (const x of m.tryit || []) {
+        const c = byKey.get(codeKey(m.id, x.id)); if (!c) continue;
+        const p = mp(m.id); p.codeAt = p.codeAt || {};
+        const local = p.code[x.id], localAt = p.codeAt[x.id] || 0, serverAt = Date.parse(c.updated_at) || 0;
+        if (local === undefined || (local !== c.code && serverAt > localAt)) {       // the server copy is newer
+          if (c.code === '') delete p.code[x.id]; else p.code[x.id] = c.code;
+          p.codeAt[x.id] = serverAt;
+        }
+        codeSent[codeKey(m.id, x.id)] = c.code;
+      }
+    });
+    codeSeen = {}; for (const c of changedCode()) codeSeen[c.k] = c.code;
+    for (const k in codeSent) if (!(k in codeSeen)) codeSeen[k] = codeSent[k];
+    sendCode();                                             // anything newer here goes up
+  }
+  function changedCode() {
+    const S = window.LAB_SERVER, P = S.progress(), out = [];
+    for (const m of S.modules) { const p = P[m.id]; if (!p) continue;
+      for (const x of m.tryit || []) { const k = codeKey(m.id, x.id), code = (p.code || {})[x.id] ?? '';
+        if ((codeSent[k] ?? '') !== code) out.push({ m, x, p, k, code }); } }
+    return out;
+  }
+  function stampCode() {                                    // remember when each exercise was last edited here
+    if (!window.LAB_SERVER || !PFX) return; let any = false;
+    for (const c of changedCode()) if (codeSeen[c.k] !== c.code) { c.p.codeAt = c.p.codeAt || {}; c.p.codeAt[c.x.id] = Date.now(); codeSeen[c.k] = c.code; any = true; }
+    if (any) window.LAB_SERVER.touch();
+  }
+  async function sendCode() {
+    if (!sessionId || !PFX || stopped || !window.LAB_SERVER) return;
+    clearTimeout(codeTimer);
+    for (const c of changedCode()) {
+      try { await api({ action: 'save_code', session_id: sessionId, activity_key: c.k, code: c.code }); codeSent[c.k] = c.code; }
+      catch (e) {
+        const msg = String(e.message || e);
+        if (/closed|not open|not published|not enrolled/i.test(msg)) { stopped = msg; setStatus(msg + '. Your work is kept in this browser but is no longer being recorded.', 'err'); return; }
+        if (/Unknown Try it|too long/i.test(msg)) { codeSent[c.k] = c.code; console.warn('participation: code not saved', c.k, msg); continue; }
+        codeTimer = setTimeout(sendCode, 15000); return;    // offline or server hiccup: try again shortly
+      }
+    }
+  }
+  document.addEventListener('lab:code', () => { stampCode(); clearTimeout(codeTimer); codeTimer = setTimeout(sendCode, 2000); });
+  window.addEventListener('pagehide', () => { if (changedCode().length) sendCode(); });
+  let flushTimer = null;
+  document.addEventListener('lab:progress', () => { clearTimeout(flushTimer); flushTimer = setTimeout(flush, 800); });
+  window.addEventListener('online', () => { flush(); sendCode(); });
 
   // ---------- sign-in UI ----------
   $('auth-signin').addEventListener('click', async () => { try { setStatus('Signing in…'); await studentAuth('login'); await bootstrap(); } catch (e) { setStatus(e.message || String(e), 'err'); } });
@@ -156,14 +297,16 @@
       student_name: txt('ai-student') || 'Roster-verified student', student_id: txt('ai-student-id') || 'Unavailable',
       section: txt('ai-section') || 'Not reported', term: txt('ai-term') || 'Fall 2026',
       status: String(c.status || 'in_progress').toUpperCase(),
-      completion_percent: L.lecturePercent, grade: null,
+      completion_percent: c.completion_percentage ?? L.lecturePercent,
+      grade: c.grade_breakdown ? (Number(c.participation_grade).toFixed(1) + ' / 100 (recorded on the server' + (c.status === 'overridden' ? ', set by instructor' : '') + ')') : (L.grade != null ? L.grade + ' / 100 (rubric, this browser)' : null),
       active_time_seconds: tracked ? time.active_seconds : null, active_time_verified: tracked, active_time_source: tracked ? 'supabase' : null,
-      cards: L.cards, cards_summary: L.cards.filter(x => x.visited).length + '/' + L.cards.length + ' (this browser)',
+      cards: L.cards, cards_summary: (c.study_cards_required ? c.study_cards_completed + '/' + c.study_cards_required + ' (recorded)' : L.cards.filter(x => x.visited).length + '/' + L.cards.length + ' (this browser)'),
       mcqs: L.mcqs, mcq_summary: L.mcqs.filter(x => x.selected !== 'Not answered').length + '/' + L.mcqs.length,
       written: [], written_summary: 'None in this lab',
       exercises: L.lectures.concat(L.tryit || []), exercise_summary: L.lectures.filter(x => x.status.startsWith('Finished')).length + '/' + L.lectures.length + ' lectures heard to the end; ' + (L.tryit || []).filter(x => x.status.startsWith('Finished')).length + '/' + (L.tryit || []).length + ' Try it exercises finished',
       notes: 'Identity, session and active study time are read from Supabase for this authenticated session' + (tracked ? '' : ' (study time could not be read and is not reported as zero)') +
-        '. Lecture listening, flip cards, practice answers and Try it exercises are recorded in this browser. Completion = share of lecture slides heard to the end.'
+        '. Slides heard, readings, traces, study cards, first answers to every question and Try it results are recorded on the server; MCQs are graded on the first answer. ' +
+        (c.grade_breakdown ? 'Grade breakdown: ' + c.grade_breakdown.parts.map(x => x.name + ' ' + x.done + '/' + x.of).join('; ') + '.' : '')
     };
   };
 

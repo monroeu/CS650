@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>CS650 Week 11 Lab — Chapter 11: Automated Planning</title>
-<meta name="description" content="Animated, narrated lecture lab for AIMA Chapter 11 (Automated Planning) with key concepts, flip cards, MCQs and a formal-language workspace for practising logic, PDDL planning and scheduling.">
+<meta name="description" content="Animated, narrated lecture lab for AIMA Chapter 11 (Automated Planning) with illustrated readings, step-by-step algorithm traces, flip cards, MCQs and a formal-language workspace for practising logic, PDDL planning and scheduling.">
 <link rel="icon" href="../favicon.ico">
 <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
 <link rel="apple-touch-icon" href="../apple-touch-icon.png">
 <link rel="stylesheet" href="assets/style.css">
 <link rel="stylesheet" href="../shared/student-login-standard.css">
-<script>window.LAB_PARTICIPATION={"slug":"chapter-11-automated-planning","version":1,"label":"Week 11"};
+<script>window.LAB_PARTICIPATION={"slug":"chapter-11-automated-planning","version":1,"label":"Week 11","prefix":"CS11"};
 window.MONROE_LOGIN_WEEK="week11";window.MONROE_LOGIN_ROOT="#authBox";window.MONROE_LOGIN_COURSE="CS650";window.MONROE_LOGIN_TERM="Fall 2026";
 window.MONROE_PDF_CONFIG={"course":"CS650","week":"11","lab":"CS650 Week 11 Lab — Chapter 11: Automated Planning","term":"Fall 2026"};</script>
 </head>
@@ -22,8 +22,14 @@ window.MONROE_PDF_CONFIG={"course":"CS650","week":"11","lab":"CS650 Week 11 Lab 
     <div class="kicker">CS650 · Week 11 Lab · <a class="homelink" href="../">CS650 home</a></div>
     <h1>Automated Planning <span class="ch">Chapter 11</span></h1>
   </div>
+  <button class="gradebtn" id="gradeBtn" type="button" aria-haspopup="dialog"><span class="gb-l">Grade so far</span><span class="gb-v" id="gradeNow">0/100</span></button>
   <div class="overall" aria-live="polite"><div class="ring" id="overallRing"><span id="overallPct">0%</span></div><span class="overall-label">complete</span></div>
 </header>
+
+<div class="gradedlg" id="gradeDlg" role="dialog" aria-modal="true" aria-labelledby="gradeTitle" hidden>
+  <div class="gradebox"><div class="gradehead"><h2 id="gradeTitle">How this lab is graded</h2><button class="tr-b" id="gradeClose" type="button">Close ✕</button></div>
+  <div id="gradeBody"></div></div>
+</div>
 
 <div class="layout">
   <nav id="nav" class="nav" aria-label="Lab sections">
@@ -93,14 +99,19 @@ window.MONROE_PDF_CONFIG={"course":"CS650","week":"11","lab":"CS650 Week 11 Lab 
     </section>
 
     <!-- LEARN -->
-    <section class="panel" id="panel-learn" role="tabpanel" aria-label="Key concepts">
+    <section class="panel" id="panel-learn" role="tabpanel" aria-label="Illustrated reading">
       <div class="learn" id="learnBody"></div>
       <div class="next-row"><button class="next-btn" id="learnNext"></button></div>
     </section>
 
+    <!-- STEP BY STEP -->
+    <section class="panel" id="panel-trace" role="tabpanel" aria-label="Step-by-step traces">
+      <div id="traceBody"></div>
+      <div class="next-row"><span class="count" id="traceCount"></span><button class="next-btn" id="traceNext"></button></div>
+    </section>
     <!-- CARDS -->
     <section class="panel" id="panel-cards" role="tabpanel" aria-label="Flip cards">
-      <p class="hint">Tap a card to flip it. Say the answer before you flip.</p>
+      <p class="hint">One card at a time. Answer out loud, tap to check, then mark it <b>Got it</b> or <b>Review again</b>. Cards you are unsure of come back a few cards later. The step is complete when every card is marked “Got it”.</p>
       <div class="cards" id="cards"></div>
       <div class="next-row"><span class="count" id="cardCount"></span><button class="next-btn" id="cardsNext"></button></div>
     </section>
@@ -113,7 +124,7 @@ window.MONROE_PDF_CONFIG={"course":"CS650","week":"11","lab":"CS650 Week 11 Lab 
 
     <!-- PRACTICE -->
     <section class="panel" id="panel-practice" role="tabpanel" aria-label="Practice questions">
-      <p class="hint">Multiple-choice practice is not graded. Read the feedback for every option — that is where the learning happens.</p>
+      <p class="hint">These questions are graded on your <b>first</b> answer, so think before you choose. After you answer, read the feedback for every option: that is where the learning happens. You can retry any question for practice.</p>
       <div class="quiz" id="practiceBody"></div>
       <div class="next-row"><span class="count" id="practiceScore"></span><button class="next-btn" id="practiceNext"></button></div>
     </section>
@@ -141,7 +152,12 @@ window.MONROE_PDF_CONFIG={"course":"CS650","week":"11","lab":"CS650 Week 11 Lab 
 <script src="assets/fl-engine.js"></script>
 <script src="assets/workspace.js"></script>
 <script src="assets/exercises11.js"></script>
+<script src="assets/pamkit.js"></script>
+<script src="assets/trace.js"></script>
+<script src="assets/traces11.js"></script>
 <script src="assets/content11.js"></script>
+<script src="assets/content11b.js"></script>
+<script src="assets/cards11.js"></script>
 <script src="assets/app.js"></script>
 <script src="participation.js"></script>
 </body>
