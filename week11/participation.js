@@ -18,7 +18,11 @@
   const put = (id, v) => { const el = $(id); if (el) el.textContent = (v && String(v).trim()) ? String(v) : '—'; };
   async function api(body) {
     const { data, error } = await client.functions.invoke('participation-api', { body });
-    if (error) throw new Error(error.message || 'Participation service error');
+    if (error) {                                          // show the function's own message, not "non-2xx status code"
+      let msg = error.message || 'Participation service error';
+      try { const j = await error.context?.json?.(); if (j?.error) msg = j.error; } catch (_) {}
+      throw new Error(msg);
+    }
     if (data?.error) throw new Error(data.error);
     return data;
   }
